@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAdminSession } from '@/lib/auth';
 import { parseDocxBuffer } from '@/lib/parser/docxParser';
+import { parseDocBuffer } from '@/lib/parser/docParser';
 import { parsePdfBuffer } from '@/lib/parser/pdfParser';
-import { validateAndStatusRecords } from '@/lib/parser/documentParser';
+import { parseExcelBuffer } from '@/lib/parser/excelParser';
+import { validateAndStatusRecords, RawParsedPerson } from '@/lib/parser/documentParser';
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25 MB
 
 export async function POST(request: NextRequest) {
   const session = await getAdminSession();
@@ -22,18 +24,21 @@ export async function POST(request: NextRequest) {
 
     if (file.size > MAX_FILE_SIZE) {
       return NextResponse.json(
-        { error: 'File size exceeds 10MB limit' },
+        { error: 'File size exceeds 25MB limit' },
         { status: 400 }
       );
     }
 
     const fileName = file.name.toLowerCase();
     const isDocx = fileName.endsWith('.docx');
+    const isDoc = fileName.endsWith('.doc') && !isDocx;
+    const isXlsx = fileName.endsWith('.xlsx');
+    const isXls = fileName.endsWith('.xls') && !isXlsx;
     const isPdf = fileName.endsWith('.pdf');
 
-    if (!isDocx && !isPdf) {
+    if (!isDocx && !isDoc && !isXlsx && !isXls && !isPdf) {
       return NextResponse.json(
-        { error: 'Unsupported file type. Please upload a .docx or .pdf document.' },
+        { error: 'Unsupported file type. Please upload a Word (.docx, .doc), Excel (.xlsx, .xls), or PDF (.pdf) file.' },
         { status: 400 }
       );
     }
@@ -41,15 +46,14 @@ export async function POST(request: NextRequest) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    let parsedRecords: Array<{
-      unique_id: string;
-      name: string;
-      address: string;
-      diksha_date?: string | null;
-    }> = [];
+    let parsedRecords: RawParsedPerson[] = [];
 
     if (isDocx) {
       parsedRecords = await parseDocxBuffer(buffer);
+    } else if (isDoc) {
+      parsedRecords = await parseDocBuffer(buffer);
+    } else if (isXlsx || isXls) {
+      parsedRecords = parseExcelBuffer(buffer);
     } else if (isPdf) {
       parsedRecords = await parsePdfBuffer(buffer);
     }
@@ -61,7 +65,7 @@ export async function POST(request: NextRequest) {
         duplicateCount: 0,
         invalidCount: 0,
         records: [],
-        message: 'No records matching Unique ID pattern found in document.',
+        message: 'No records matching Unique ID pattern or valid tabular headers found in document.',
       });
     }
 
@@ -70,7 +74,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('File parse API error:', error);
     return NextResponse.json(
-      { error: 'Failed to process document file. Please ensure valid .docx or .pdf formatting.' },
+      { error: 'Failed to process file. Please ensure valid document or spreadsheet formatting.' },
       { status: 500 }
     );
   }

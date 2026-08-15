@@ -2,7 +2,7 @@
 
 import React, { useState, useRef } from 'react';
 import { useLanguage } from '../LanguageProvider';
-import { UploadCloud, FileText, CheckCircle2, AlertCircle } from 'lucide-react';
+import { UploadCloud, FileText, CheckCircle2, AlertCircle, FileSpreadsheet, File } from 'lucide-react';
 
 interface FileUploadZoneProps {
   onFileSelect: (file: File) => void;
@@ -15,7 +15,7 @@ export default function FileUploadZone({
   isLoading,
   error,
 }: FileUploadZoneProps) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragActive, setDragActive] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -52,6 +52,38 @@ export default function FileUploadZone({
     }
   };
 
+  const getFileIcon = (filename: string) => {
+    const ext = filename.toLowerCase().split('.').pop();
+    if (ext === 'xlsx' || ext === 'xls') {
+      return (
+        <div
+          className="rounded-3 d-flex align-items-center justify-content-center"
+          style={{ width: '2.75rem', height: '2.75rem', backgroundColor: '#f0fdf4', color: '#166534', border: '1px solid #bbf7d0' }}
+        >
+          <FileSpreadsheet size={24} />
+        </div>
+      );
+    } else if (ext === 'pdf') {
+      return (
+        <div
+          className="rounded-3 d-flex align-items-center justify-content-center"
+          style={{ width: '2.75rem', height: '2.75rem', backgroundColor: '#fff1f2', color: '#881337', border: '1px solid #fecdd3' }}
+        >
+          <FileText size={24} />
+        </div>
+      );
+    } else {
+      return (
+        <div
+          className="rounded-3 d-flex align-items-center justify-content-center"
+          style={{ width: '2.75rem', height: '2.75rem', backgroundColor: '#eff6ff', color: '#0369a1', border: '1px solid #bfdbfe' }}
+        >
+          <FileText size={24} />
+        </div>
+      );
+    }
+  };
+
   return (
     <div className="rkm-card mb-4">
       <div className="p-4 p-md-5">
@@ -69,7 +101,7 @@ export default function FileUploadZone({
           <input
             ref={fileInputRef}
             type="file"
-            accept=".docx,.pdf"
+            accept=".docx,.doc,.xlsx,.xls,.pdf"
             className="d-none"
             onChange={handleChange}
           />
@@ -81,8 +113,20 @@ export default function FileUploadZone({
             <UploadCloud size={32} />
           </div>
 
-          <h4 className="fw-bold text-dark mb-1 fs-5">{t('uploadTitle')}</h4>
-          <p className="text-muted mb-3 max-w-md mx-auto small">{t('uploadSub')}</p>
+          <h4 className="fw-bold text-dark mb-1 fs-5">
+            {language === 'bn' ? 'ফাইল আপলোড করুন (Word, Excel, PDF)' : 'Upload File (Word, Excel, PDF)'}
+          </h4>
+          <p className="text-muted mb-3 max-w-md mx-auto small">
+            {language === 'bn'
+              ? 'দীক্ষিত ব্যক্তিদের রেকর্ড সম্বলিত .docx, .doc, .xlsx, .xls, অথবা .pdf ফাইল নির্বাচন করুন।'
+              : 'Drag & drop a .docx, .doc, .xlsx, .xls, or .pdf file containing initiated person records.'}
+          </p>
+
+          <div className="d-flex justify-content-center flex-wrap gap-2 mb-3">
+            <span className="chip-tag chip-blue">Word (.doc, .docx)</span>
+            <span className="chip-tag chip-green">Excel (.xls, .xlsx)</span>
+            <span className="chip-tag chip-maroon">PDF (.pdf)</span>
+          </div>
 
           <button
             type="button"
@@ -97,19 +141,19 @@ export default function FileUploadZone({
         </div>
 
         {selectedFile && (
-          <div className="mt-4 p-3 bg-light rounded-3 border border-slate-200 d-flex flex-wrap align-items-center justify-content-between gap-3">
+          <div className="mt-4 p-3.5 bg-light rounded-3 border border-slate-200 d-flex flex-wrap align-items-center justify-content-between gap-3 animate-fade-in">
             <div className="d-flex align-items-center gap-3">
-              <div
-                className="rounded-3 d-flex align-items-center justify-content-center"
-                style={{ width: '2.5rem', height: '2.5rem', backgroundColor: 'var(--rkm-blue-light)', color: 'var(--rkm-blue)' }}
-              >
-                <FileText size={22} />
-              </div>
+              {getFileIcon(selectedFile.name)}
               <div>
                 <h6 className="fw-bold mb-0 text-dark fs-6">{selectedFile.name}</h6>
-                <span className="small text-muted font-mono" style={{ fontSize: '0.75rem' }}>
-                  {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB
-                </span>
+                <div className="d-flex align-items-center gap-2 mt-0.5">
+                  <span className="small text-muted font-mono" style={{ fontSize: '0.75rem' }}>
+                    {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB
+                  </span>
+                  <span className="badge-unique-id" style={{ fontSize: '0.6875rem', padding: '0.1rem 0.35rem' }}>
+                    {selectedFile.name.split('.').pop()?.toUpperCase()}
+                  </span>
+                </div>
               </div>
             </div>
 

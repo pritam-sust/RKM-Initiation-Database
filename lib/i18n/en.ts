@@ -32,8 +32,8 @@ export const en = {
   cancel: 'Cancel',
   confirm: 'Confirm',
   save: 'Save Record',
-  uploadTitle: 'Upload Word or PDF File',
-  uploadSub: 'Drag & drop a .docx or .pdf file containing initiated person records, or click to browse.',
+  uploadTitle: 'Upload Word, Excel, or PDF File',
+  uploadSub: 'Drag & drop a .docx, .doc, .xlsx, .xls, or .pdf file containing initiated person records, or click to browse.',
   uploadBtn: 'Choose File',
   processing: 'Processing document...',
   previewTitle: 'Document Import Preview',
@@ -62,4 +62,3 @@ export const en = {
   filterByField: 'Filter by specific fields',
   activeFiltersCount: 'active filters',
 };
-

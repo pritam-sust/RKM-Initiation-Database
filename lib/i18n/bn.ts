@@ -32,8 +32,8 @@ export const bn = {
   cancel: 'বাতিল',
   confirm: 'নিশ্চিত করুন',
   save: 'সংরক্ষণ করুন',
-  uploadTitle: 'ওয়ার্ড (.docx) অথবা পিডিএফ (.pdf) ফাইল আপলোড করুন',
-  uploadSub: 'দীক্ষিত ব্যক্তির রেকর্ড সম্বলিত ফাইল টানুন বা সিলেক্ট করুন।',
+  uploadTitle: 'ওয়ার্ড, এক্সেল অথবা পিডিএফ ফাইল আপলোড করুন',
+  uploadSub: 'দীক্ষিত ব্যক্তির রেকর্ড সম্বলিত .docx, .doc, .xlsx, .xls অথবা .pdf ফাইল নির্বাচন করুন।',
   uploadBtn: 'ফাইল নির্বাচন করুন',
   processing: 'ডকুমেন্ট প্রসেস হচ্ছে...',
   previewTitle: 'ইমপোর্ট পূর্বরূপ (Preview)',
@@ -62,4 +62,3 @@ export const bn = {
   filterByField: 'নির্দিষ্ট তথ্য অনুসারে ফিল্টার করুন',
   activeFiltersCount: 'টি ফিল্টার সক্রিয়',
 };
-

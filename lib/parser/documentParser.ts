@@ -2,6 +2,19 @@ import { ParsedRecord, ParseSummary } from '@/types';
 import { prisma } from '@/lib/db';
 import { isBijoyText, convertBijoyToUnicode } from './bijoyToUnicode';
 
+export interface RawParsedPerson {
+  unique_id: string;
+  name: string;
+  father_or_spouse_name?: string | null;
+  age?: string | null;
+  address: string;
+  mobile_number?: string | null;
+  occupation?: string | null;
+  education?: string | null;
+  diksha_date?: string | null;
+  diksha_guru?: string | null;
+}
+
 /**
  * Checks if a token looks like a Unique ID.
  * Examples:
@@ -39,12 +52,27 @@ export function isUniqueIdToken(token: string): boolean {
 }
 
 /**
- * Parses a single line starting with a Unique ID.
+ * Parses a single line starting with a Unique ID or labeled with 'দীক্ষার নম্বর', 'ইউনিক আইডি', etc.
  */
 export function parseUniqueIdLine(line: string): { unique_id: string; restOfLine: string } | null {
   const trimmed = line.trim();
   if (!trimmed) return null;
 
+  // Check labeled prefixes: e.g. "দীক্ষার নম্বর: সিএ১২৩৪৫৬ শ্রী প্রদীপ দে" or "দীক্ষা নং - DA6140 Sri Pradip"
+  const labelPrefixMatch = trimmed.match(
+    /^(?:দীক্ষার\s*নম্বর|দীক্ষা\s*নম্বর|দীক্ষার\s*নং|দীক্ষা\s*নং|দীক্ষা\s*ক্রমিক|ইউনিক\s*আইডি|আইডি|Unique\s*ID|ID|Diksha\s*No|Initiation\s*No)[\s:/-]+([^\s,]+)\s*(.*)$/i
+  );
+
+  if (labelPrefixMatch) {
+    const idToken = labelPrefixMatch[1].replace(/[:;,]$/, '').trim();
+    const rest = labelPrefixMatch[2].trim();
+    return {
+      unique_id: idToken,
+      restOfLine: rest,
+    };
+  }
+
+  // Check token-based starting IDs
   const match = trimmed.match(/^([^\s]+)\s*(.*)$/);
   if (!match) return null;
 
@@ -74,8 +102,8 @@ export function preprocessText(rawText: string): string {
     text = convertBijoyToUnicode(text);
   }
 
-  // Regex matching Unique IDs anywhere in text (handles both Bengali & English IDs)
-  const uniqueIdRegex = /(?:^|\s)(?:ডিএ|সিএ|ডি-এ|wWG|DA|CA|ID|RKM|[A-Z]{2,6})[\s/\._-]?[0-9\u09E6-\u09EF]{2,10}/gi;
+  // Regex matching Unique IDs or labeled Initiation Numbers anywhere in text
+  const uniqueIdRegex = /(?:^|\s)(?:(?:দীক্ষার\s*নম্বর|দীক্ষা\s*নম্বর|দীক্ষার\s*নং|দীক্ষা\s*নং|ডিএ|সিএ|ডি-এ|wWG|DA|CA|ID|RKM|[A-Z]{2,6})[\s:/\._-]?[0-9\u09E6-\u09EF]{2,10})/gi;
 
   const lines = text.split(/\r?\n/);
   const formattedLines: string[] = [];
@@ -109,12 +137,7 @@ export function preprocessText(rawText: string): string {
  * Main Document Parser Engine.
  * Converts raw document text into structured records with Unique ID, Name, and multiline Address.
  */
-export function parseDocumentText(rawText: string): Array<{
-  unique_id: string;
-  name: string;
-  address: string;
-  diksha_date?: string | null;
-}> {
+export function parseDocumentText(rawText: string): RawParsedPerson[] {
   const cleanedText = preprocessText(rawText);
 
   const lines = cleanedText
@@ -125,15 +148,27 @@ export function parseDocumentText(rawText: string): Array<{
   const rawRecords: Array<{
     unique_id: string;
     name: string;
+    father_or_spouse_name?: string | null;
+    age?: string | null;
     addressLines: string[];
+    mobile_number?: string | null;
+    occupation?: string | null;
+    education?: string | null;
     diksha_date?: string | null;
+    diksha_guru?: string | null;
   }> = [];
 
   let currentRecord: {
     unique_id: string;
     name: string;
+    father_or_spouse_name?: string | null;
+    age?: string | null;
     addressLines: string[];
+    mobile_number?: string | null;
+    occupation?: string | null;
+    education?: string | null;
     diksha_date?: string | null;
+    diksha_guru?: string | null;
   } | null = null;
 
   for (const line of lines) {
@@ -149,7 +184,7 @@ export function parseDocumentText(rawText: string): Array<{
       let dikshaDate: string | null = null;
 
       // Extract optional diksha date patterns if present in name line
-      const dikshaMatch = name.match(/(?:দীক্ষা|Diksha|Initiated)[\s:]*([^\s,]+)/i);
+      const dikshaMatch = name.match(/(?:দীক্ষার\s*তারিখ|দীক্ষা\s*তারিখ|দীক্ষা|Diksha|Initiated)[\s:]*([^\s,]+)/i);
       if (dikshaMatch) {
         dikshaDate = dikshaMatch[1];
         name = name.replace(dikshaMatch[0], '').trim();
@@ -158,16 +193,32 @@ export function parseDocumentText(rawText: string): Array<{
       currentRecord = {
         unique_id: idLineMatch.unique_id,
         name: name,
+        father_or_spouse_name: null,
+        age: null,
         addressLines: [],
+        mobile_number: null,
+        occupation: null,
+        education: null,
         diksha_date: dikshaDate,
+        diksha_guru: null,
       };
     } else if (currentRecord) {
       if (!currentRecord.name) {
         currentRecord.name = line;
       } else {
-        const dateMatch = line.match(/(?:দীক্ষা|Diksha|Initiated)[\s:]*(.+)$/i);
+        const dateMatch = line.match(/(?:দীক্ষার\s*তারিখ|দীক্ষা\s*তারিখ|দীক্ষা|Diksha|Initiated)[\s:]*(.+)$/i);
+        const guruMatch = line.match(/(?:দীক্ষাগুরু|Guru|Swami)[\s:]*(.+)$/i);
+        const mobileMatch = line.match(/(?:মোবাইল|Mobile|Phone|Tel)[\s:]*([0-9\u09E6-\u09EF\s\-+]+)/i);
+        const fatherMatch = line.match(/(?:পিতা|স্বামী|Father|Spouse|Husband)[\s:]*(.+)$/i);
+
         if (dateMatch) {
           currentRecord.diksha_date = dateMatch[1].trim();
+        } else if (guruMatch) {
+          currentRecord.diksha_guru = guruMatch[1].trim();
+        } else if (mobileMatch) {
+          currentRecord.mobile_number = mobileMatch[1].trim();
+        } else if (fatherMatch) {
+          currentRecord.father_or_spouse_name = fatherMatch[1].trim();
         } else {
           currentRecord.addressLines.push(line);
         }
@@ -183,8 +234,14 @@ export function parseDocumentText(rawText: string): Array<{
   return rawRecords.map((rec) => ({
     unique_id: rec.unique_id,
     name: rec.name || 'N/A',
+    father_or_spouse_name: rec.father_or_spouse_name || null,
+    age: rec.age || null,
     address: rec.addressLines.join('\n').trim() || 'N/A',
+    mobile_number: rec.mobile_number || null,
+    occupation: rec.occupation || null,
+    education: rec.education || null,
     diksha_date: rec.diksha_date || null,
+    diksha_guru: rec.diksha_guru || null,
   }));
 }
 
@@ -192,7 +249,7 @@ export function parseDocumentText(rawText: string): Array<{
  * Validates parsed records against PostgreSQL database to flag duplicates or invalid records.
  */
 export async function validateAndStatusRecords(
-  parsed: Array<{ unique_id: string; name: string; address: string; diksha_date?: string | null }>
+  parsed: RawParsedPerson[]
 ): Promise<ParseSummary> {
   const existingRecords = await prisma.person.findMany({
     where: {
@@ -242,8 +299,14 @@ export async function validateAndStatusRecords(
       tempId: `parsed_${idx}_${Date.now()}`,
       unique_id: rec.unique_id,
       name: rec.name,
+      father_or_spouse_name: rec.father_or_spouse_name || null,
+      age: rec.age || null,
       address: rec.address,
-      diksha_date: rec.diksha_date,
+      mobile_number: rec.mobile_number || null,
+      occupation: rec.occupation || null,
+      education: rec.education || null,
+      diksha_date: rec.diksha_date || null,
+      diksha_guru: rec.diksha_guru || null,
       status,
       errorMessage,
       selected: status === 'valid',
