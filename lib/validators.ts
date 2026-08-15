@@ -3,8 +3,14 @@ import { z } from 'zod';
 export const personSchema = z.object({
   unique_id: z.string().trim().min(1, 'Unique ID is required'),
   name: z.string().trim().min(1, 'Name is required'),
+  father_or_spouse_name: z.string().trim().optional().nullable(),
+  age: z.string().trim().optional().nullable(),
   address: z.string().trim().min(1, 'Address is required'),
+  mobile_number: z.string().trim().optional().nullable(),
+  occupation: z.string().trim().optional().nullable(),
+  education: z.string().trim().optional().nullable(),
   diksha_date: z.string().trim().optional().nullable(),
+  diksha_guru: z.string().trim().optional().nullable(),
 });
 
 export const loginSchema = z.object({
@@ -17,8 +23,14 @@ export const bulkImportSchema = z.object({
     z.object({
       unique_id: z.string().trim().min(1),
       name: z.string().trim().min(1),
+      father_or_spouse_name: z.string().trim().optional().nullable(),
+      age: z.string().trim().optional().nullable(),
       address: z.string().trim().min(1),
+      mobile_number: z.string().trim().optional().nullable(),
+      occupation: z.string().trim().optional().nullable(),
+      education: z.string().trim().optional().nullable(),
       diksha_date: z.string().trim().optional().nullable(),
+      diksha_guru: z.string().trim().optional().nullable(),
     })
   ).min(1, 'At least one record must be selected for import'),
 });

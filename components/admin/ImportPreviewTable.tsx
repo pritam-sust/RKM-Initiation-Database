@@ -143,17 +143,20 @@ export default function ImportPreviewTable({
                 <th style={{ width: '50px' }} className="text-center">
                   Select
                 </th>
-                <th style={{ width: '150px' }}>{t('uniqueId')}</th>
-                <th style={{ width: '220px' }}>{t('name')}</th>
+                <th style={{ width: '140px' }}>{t('uniqueId')}</th>
+                <th style={{ width: '160px' }}>{t('name')}</th>
+                <th style={{ width: '140px' }}>{t('fatherOrSpouseName')}</th>
+                <th style={{ width: '105px' }}>{t('mobileNumber')}</th>
+                <th style={{ width: '105px' }}>{t('dikshaDate')}</th>
+                <th style={{ width: '120px' }}>{t('dikshaGuru')}</th>
                 <th>{t('address')}</th>
-                <th style={{ width: '130px' }}>{t('dikshaDate')}</th>
-                <th style={{ width: '140px' }}>Status</th>
+                <th style={{ width: '120px' }}>Status</th>
               </tr>
             </thead>
             <tbody>
               {filteredRecords.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-4 text-muted">
+                  <td colSpan={10} className="text-center py-4 text-muted">
                     No records found for the selected status filter.
                   </td>
                 </tr>
@@ -180,8 +183,11 @@ export default function ImportPreviewTable({
                       </span>
                     </td>
                     <td className="fw-semibold text-dark">{rec.name}</td>
-                    <td className="whitespace-pre-line small text-secondary">{rec.address}</td>
+                    <td className="small text-secondary">{rec.father_or_spouse_name || '—'}</td>
+                    <td className="small font-mono">{rec.mobile_number || '—'}</td>
                     <td className="small">{rec.diksha_date || '—'}</td>
+                    <td className="small">{rec.diksha_guru || '—'}</td>
+                    <td className="whitespace-pre-line small text-secondary" style={{ maxWidth: '180px' }}>{rec.address}</td>
                     <td>
                       {rec.status === 'valid' && (
                         <span className="badge bg-success bg-opacity-15 text-success border border-success border-opacity-25 rounded-pill px-3 py-1 d-inline-flex align-items-center gap-1">

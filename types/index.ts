@@ -2,8 +2,14 @@ export interface PersonRecord {
   id: string;
   unique_id: string;
   name: string;
+  father_or_spouse_name?: string | null;
+  age?: string | null;
   address: string;
+  mobile_number?: string | null;
+  occupation?: string | null;
+  education?: string | null;
   diksha_date?: string | null;
+  diksha_guru?: string | null;
   created_at: string | Date;
   updated_at: string | Date;
 }
@@ -14,8 +20,14 @@ export interface ParsedRecord {
   tempId: string;
   unique_id: string;
   name: string;
+  father_or_spouse_name?: string | null;
+  age?: string | null;
   address: string;
+  mobile_number?: string | null;
+  occupation?: string | null;
+  education?: string | null;
   diksha_date?: string | null;
+  diksha_guru?: string | null;
   status: ParseStatus;
   errorMessage?: string;
   selected?: boolean;
@@ -29,8 +41,21 @@ export interface ParseSummary {
   records: ParsedRecord[];
 }
 
-export interface SearchQueryOptions {
-  query?: string;
+export interface PersonFilterOptions {
+  q?: string;
+  unique_id?: string;
+  name?: string;
+  father_or_spouse_name?: string;
+  age?: string;
+  address?: string;
+  mobile_number?: string;
+  occupation?: string;
+  education?: string;
+  diksha_date?: string;
+  diksha_guru?: string;
+}
+
+export interface SearchQueryOptions extends PersonFilterOptions {
   page?: number;
   limit?: number;
 }
@@ -42,3 +67,4 @@ export interface PaginatedResult<T> {
   totalPages: number;
   limit: number;
 }
+

@@ -94,7 +94,26 @@ export default function SearchResultList({
                     )}
                   </div>
 
-                  <h3 className="h5 fw-bold text-dark mb-2">{person.name}</h3>
+                  <h3 className="h5 fw-bold text-dark mb-1">{person.name}</h3>
+
+                  {person.father_or_spouse_name && (
+                    <p className="text-muted small mb-2">
+                      <span className="text-secondary">{t('fatherOrSpouseName')}:</span> {person.father_or_spouse_name}
+                    </p>
+                  )}
+
+                  <div className="d-flex flex-wrap gap-2 mb-2">
+                    {person.diksha_guru && (
+                      <span className="badge bg-secondary bg-opacity-10 text-secondary border rounded-pill px-2 small">
+                        {t('dikshaGuru')}: {person.diksha_guru}
+                      </span>
+                    )}
+                    {person.mobile_number && (
+                      <span className="badge bg-secondary bg-opacity-10 text-secondary border rounded-pill px-2 small font-mono">
+                        {person.mobile_number}
+                      </span>
+                    )}
+                  </div>
 
                   <p className="text-muted small mb-3 whitespace-pre-line text-truncate-2 d-flex gap-1.5 align-items-start">
                     <MapPin className="w-4 h-4 text-secondary flex-shrink-0 mt-0.5" />

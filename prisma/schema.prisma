@@ -8,13 +8,19 @@ datasource db {
 }
 
 model Person {
-  id          String   @id @default(uuid())
-  unique_id   String   @unique @map("unique_id")
-  name        String
-  address     String   @db.Text
-  diksha_date String?  @map("diksha_date")
-  created_at  DateTime @default(now()) @map("created_at")
-  updated_at  DateTime @updatedAt @map("updated_at")
+  id                     String   @id @default(uuid())
+  unique_id              String   @unique @map("unique_id")
+  name                   String
+  father_or_spouse_name  String?  @map("father_or_spouse_name")
+  age                    String?
+  address                String   @db.Text
+  mobile_number          String?  @map("mobile_number")
+  occupation             String?
+  education              String?
+  diksha_date            String?  @map("diksha_date")
+  diksha_guru            String?  @map("diksha_guru")
+  created_at             DateTime @default(now()) @map("created_at")
+  updated_at             DateTime @updatedAt @map("updated_at")
 
   @@index([unique_id])
   @@index([name])

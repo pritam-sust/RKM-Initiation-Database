@@ -47,8 +47,14 @@ export async function POST(request: NextRequest) {
           data: {
             unique_id: rec.unique_id,
             name: rec.name,
+            father_or_spouse_name: rec.father_or_spouse_name || null,
+            age: rec.age || null,
             address: rec.address,
+            mobile_number: rec.mobile_number || null,
+            occupation: rec.occupation || null,
+            education: rec.education || null,
             diksha_date: rec.diksha_date || null,
+            diksha_guru: rec.diksha_guru || null,
           },
         });
         count++;

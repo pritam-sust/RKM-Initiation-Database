@@ -22,8 +22,14 @@ export default function PersonFormModal({
 
   const [uniqueId, setUniqueId] = useState('');
   const [name, setName] = useState('');
+  const [fatherOrSpouseName, setFatherOrSpouseName] = useState('');
+  const [age, setAge] = useState('');
   const [address, setAddress] = useState('');
+  const [mobileNumber, setMobileNumber] = useState('');
+  const [occupation, setOccupation] = useState('');
+  const [education, setEducation] = useState('');
   const [dikshaDate, setDikshaDate] = useState('');
+  const [dikshaGuru, setDikshaGuru] = useState('');
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -32,13 +38,25 @@ export default function PersonFormModal({
     if (person) {
       setUniqueId(person.unique_id);
       setName(person.name);
+      setFatherOrSpouseName(person.father_or_spouse_name || '');
+      setAge(person.age || '');
       setAddress(person.address);
+      setMobileNumber(person.mobile_number || '');
+      setOccupation(person.occupation || '');
+      setEducation(person.education || '');
       setDikshaDate(person.diksha_date || '');
+      setDikshaGuru(person.diksha_guru || '');
     } else {
       setUniqueId('');
       setName('');
+      setFatherOrSpouseName('');
+      setAge('');
       setAddress('');
+      setMobileNumber('');
+      setOccupation('');
+      setEducation('');
       setDikshaDate('');
+      setDikshaGuru('');
     }
     setError(null);
   }, [person, isOpen]);
@@ -53,8 +71,14 @@ export default function PersonFormModal({
     const payload = {
       unique_id: uniqueId.trim(),
       name: name.trim(),
+      father_or_spouse_name: fatherOrSpouseName.trim() || null,
+      age: age.trim() || null,
       address: address.trim(),
+      mobile_number: mobileNumber.trim() || null,
+      occupation: occupation.trim() || null,
+      education: education.trim() || null,
       diksha_date: dikshaDate.trim() || null,
+      diksha_guru: dikshaGuru.trim() || null,
     };
 
     try {
@@ -93,7 +117,7 @@ export default function PersonFormModal({
       onClick={onClose}
     >
       <div
-        className="modal-dialog modal-dialog-centered modal-lg"
+        className="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable"
         onClick={(e) => e.stopPropagation()}
       >
         <form onSubmit={handleSubmit} className="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
@@ -119,13 +143,13 @@ export default function PersonFormModal({
 
             <div className="row g-3">
               {/* Unique ID */}
-              <div className="col-md-6">
+              <div className="col-md-4">
                 <label className="form-label fw-semibold text-dark">
                   {t('uniqueId')} <span className="text-danger">*</span>
                 </label>
                 <input
                   type="text"
-                  className="form-control form-control-lg font-mono rounded-3"
+                  className="form-control rounded-3"
                   placeholder="e.g. সিএ১২৩৪৫৬ or DA6140"
                   value={uniqueId}
                   onChange={(e) => setUniqueId(e.target.value)}
@@ -134,29 +158,101 @@ export default function PersonFormModal({
               </div>
 
               {/* Diksha Date */}
-              <div className="col-md-6">
+              <div className="col-md-4">
                 <label className="form-label fw-semibold text-dark">{t('dikshaDate')}</label>
                 <input
                   type="text"
-                  className="form-control form-control-lg rounded-3"
+                  className="form-control rounded-3"
                   placeholder="e.g. 12-05-2020 or ১২/০৫/২০২০"
                   value={dikshaDate}
                   onChange={(e) => setDikshaDate(e.target.value)}
                 />
               </div>
 
+              {/* Diksha Guru */}
+              <div className="col-md-4">
+                <label className="form-label fw-semibold text-dark">{t('dikshaGuru')}</label>
+                <input
+                  type="text"
+                  className="form-control rounded-3"
+                  placeholder="e.g. Swami Vivekananda"
+                  value={dikshaGuru}
+                  onChange={(e) => setDikshaGuru(e.target.value)}
+                />
+              </div>
+
               {/* Name */}
-              <div className="col-12">
+              <div className="col-md-6">
                 <label className="form-label fw-semibold text-dark">
                   {t('name')} <span className="text-danger">*</span>
                 </label>
                 <input
                   type="text"
-                  className="form-control form-control-lg rounded-3"
-                  placeholder="e.g. শ্রীপ্রদীপ দে or Sri Dhiman Rjn Bhowmik"
+                  className="form-control rounded-3"
+                  placeholder="e.g. শ্রীপ্রদীপ দে or Sri Dhiman Bhowmik"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
+                />
+              </div>
+
+              {/* Father / Spouse Name */}
+              <div className="col-md-6">
+                <label className="form-label fw-semibold text-dark">{t('fatherOrSpouseName')}</label>
+                <input
+                  type="text"
+                  className="form-control rounded-3"
+                  placeholder="e.g. শ্রী সুবিনয় রায়"
+                  value={fatherOrSpouseName}
+                  onChange={(e) => setFatherOrSpouseName(e.target.value)}
+                />
+              </div>
+
+              {/* Age */}
+              <div className="col-md-3">
+                <label className="form-label fw-semibold text-dark">{t('age')}</label>
+                <input
+                  type="text"
+                  className="form-control rounded-3"
+                  placeholder="e.g. 45"
+                  value={age}
+                  onChange={(e) => setAge(e.target.value)}
+                />
+              </div>
+
+              {/* Mobile Number */}
+              <div className="col-md-4">
+                <label className="form-label fw-semibold text-dark">{t('mobileNumber')}</label>
+                <input
+                  type="text"
+                  className="form-control rounded-3"
+                  placeholder="e.g. 01712345678"
+                  value={mobileNumber}
+                  onChange={(e) => setMobileNumber(e.target.value)}
+                />
+              </div>
+
+              {/* Occupation */}
+              <div className="col-md-5">
+                <label className="form-label fw-semibold text-dark">{t('occupation')}</label>
+                <input
+                  type="text"
+                  className="form-control rounded-3"
+                  placeholder="e.g. ব্যবসায়ী / Teacher"
+                  value={occupation}
+                  onChange={(e) => setOccupation(e.target.value)}
+                />
+              </div>
+
+              {/* Education */}
+              <div className="col-md-6">
+                <label className="form-label fw-semibold text-dark">{t('education')}</label>
+                <input
+                  type="text"
+                  className="form-control rounded-3"
+                  placeholder="e.g. স্নাতক / B.Sc."
+                  value={education}
+                  onChange={(e) => setEducation(e.target.value)}
                 />
               </div>
 
@@ -166,8 +262,8 @@ export default function PersonFormModal({
                   {t('address')} <span className="text-danger">*</span>
                 </label>
                 <textarea
-                  className="form-control form-control-lg rounded-3"
-                  rows={4}
+                  className="form-control rounded-3"
+                  rows={3}
                   placeholder="Enter full multiline address..."
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}

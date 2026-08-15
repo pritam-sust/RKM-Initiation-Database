@@ -3,11 +3,34 @@
 import React from 'react';
 import { PersonRecord } from '@/types';
 import { useLanguage } from './LanguageProvider';
-import { User, Tag, Calendar, MapPin, X } from 'lucide-react';
+import { User, Tag, Calendar, MapPin, Phone, Briefcase, GraduationCap, BookOpen, Users } from 'lucide-react';
 
 interface PersonDetailModalProps {
   person: PersonRecord | null;
   onClose: () => void;
+}
+
+interface InfoRowProps {
+  icon: React.ReactNode;
+  label: string;
+  value?: string | null;
+  notSpecified: string;
+  mono?: boolean;
+  preWrap?: boolean;
+}
+
+function InfoRow({ icon, label, value, notSpecified, mono, preWrap }: InfoRowProps) {
+  return (
+    <div className="p-3 rounded-3 bg-light border border-secondary-subtle h-100">
+      <div className="d-flex align-items-center gap-2 text-primary mb-2">
+        {icon}
+        <span className="fw-semibold text-dark small text-uppercase tracking-wider">{label}</span>
+      </div>
+      <p className={`mb-0 text-dark fw-bold ${mono ? 'font-mono fs-5' : 'fs-6'} ${preWrap ? 'whitespace-pre-line' : ''}`}>
+        {value ? value : <span className="text-muted fst-italic fw-normal">{notSpecified}</span>}
+      </p>
+    </div>
+  );
 }
 
 export default function PersonDetailModal({ person, onClose }: PersonDetailModalProps) {
@@ -24,7 +47,7 @@ export default function PersonDetailModal({ person, onClose }: PersonDetailModal
       onClick={onClose}
     >
       <div
-        className="modal-dialog modal-dialog-centered modal-lg"
+        className="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
@@ -46,58 +69,98 @@ export default function PersonDetailModal({ person, onClose }: PersonDetailModal
 
           {/* Body */}
           <div className="modal-body p-4">
-            {/* Person Name */}
+            {/* Person Name – Hero Row */}
             <div className="d-flex align-items-start gap-3 mb-4 pb-3 border-bottom">
-              <div className="bg-primary bg-opacity-10 text-primary p-3 rounded-circle d-flex align-items-center justify-content-center">
+              <div className="bg-primary bg-opacity-10 text-primary p-3 rounded-circle d-flex align-items-center justify-content-center flex-shrink-0">
                 <User className="w-8 h-8" />
               </div>
               <div>
-                <span className="text-uppercase small text-muted font-semibold tracking-wider d-block mb-1">
-                  {t('name')}
-                </span>
+                <span className="text-uppercase small text-muted fw-semibold d-block mb-1">{t('name')}</span>
                 <h3 className="h4 text-dark fw-bold mb-0">{person.name}</h3>
+                {person.father_or_spouse_name && (
+                  <p className="text-muted small mb-0 mt-1">
+                    {t('fatherOrSpouseName')}: {person.father_or_spouse_name}
+                  </p>
+                )}
               </div>
             </div>
 
-            <div className="row g-4">
-              {/* Unique ID */}
-              <div className="col-md-6">
-                <div className="p-3 rounded-3 bg-light border border-secondary-subtle h-100">
-                  <div className="d-flex align-items-center gap-2 text-primary mb-2">
-                    <Tag className="w-5 h-5" />
-                    <span className="fw-semibold text-dark">{t('uniqueId')}</span>
-                  </div>
-                  <p className="fs-5 font-mono text-dark fw-bold mb-0">{person.unique_id}</p>
-                </div>
+            {/* Row 1: Unique ID | Diksha Date | Diksha Guru */}
+            <div className="row g-3 mb-3">
+              <div className="col-md-4">
+                <InfoRow
+                  icon={<Tag className="w-4 h-4" />}
+                  label={t('uniqueId')}
+                  value={person.unique_id}
+                  notSpecified={t('notSpecified')}
+                  mono
+                />
               </div>
-
-              {/* Diksha Date */}
-              <div className="col-md-6">
-                <div className="p-3 rounded-3 bg-light border border-secondary-subtle h-100">
-                  <div className="d-flex align-items-center gap-2 text-primary mb-2">
-                    <Calendar className="w-5 h-5" />
-                    <span className="fw-semibold text-dark">{t('dikshaDate')}</span>
-                  </div>
-                  <p className="fs-5 text-dark fw-bold mb-0">
-                    {person.diksha_date ? person.diksha_date : <span className="text-muted fst-italic">{t('notSpecified')}</span>}
-                  </p>
-                </div>
+              <div className="col-md-4">
+                <InfoRow
+                  icon={<Calendar className="w-4 h-4" />}
+                  label={t('dikshaDate')}
+                  value={person.diksha_date}
+                  notSpecified={t('notSpecified')}
+                />
               </div>
+              <div className="col-md-4">
+                <InfoRow
+                  icon={<BookOpen className="w-4 h-4" />}
+                  label={t('dikshaGuru')}
+                  value={person.diksha_guru}
+                  notSpecified={t('notSpecified')}
+                />
+              </div>
+            </div>
 
-              {/* Address */}
-              <div className="col-12">
-                <div className="p-3 rounded-3 bg-light border border-secondary-subtle">
-                  <div className="d-flex align-items-center gap-2 text-primary mb-2">
-                    <MapPin className="w-5 h-5" />
-                    <span className="fw-semibold text-dark">{t('address')}</span>
-                  </div>
-                  <div
-                    className="fs-6 text-dark whitespace-pre-line bg-white p-3 rounded-2 border border-secondary-subtle font-sans"
-                    style={{ minHeight: '100px', lineHeight: '1.6' }}
-                  >
-                    {person.address}
-                  </div>
-                </div>
+            {/* Row 2: Age | Mobile | Occupation | Education */}
+            <div className="row g-3 mb-3">
+              <div className="col-md-3">
+                <InfoRow
+                  icon={<Users className="w-4 h-4" />}
+                  label={t('age')}
+                  value={person.age}
+                  notSpecified={t('notSpecified')}
+                />
+              </div>
+              <div className="col-md-3">
+                <InfoRow
+                  icon={<Phone className="w-4 h-4" />}
+                  label={t('mobileNumber')}
+                  value={person.mobile_number}
+                  notSpecified={t('notSpecified')}
+                />
+              </div>
+              <div className="col-md-3">
+                <InfoRow
+                  icon={<Briefcase className="w-4 h-4" />}
+                  label={t('occupation')}
+                  value={person.occupation}
+                  notSpecified={t('notSpecified')}
+                />
+              </div>
+              <div className="col-md-3">
+                <InfoRow
+                  icon={<GraduationCap className="w-4 h-4" />}
+                  label={t('education')}
+                  value={person.education}
+                  notSpecified={t('notSpecified')}
+                />
+              </div>
+            </div>
+
+            {/* Address – Full Width */}
+            <div className="p-3 rounded-3 bg-light border border-secondary-subtle">
+              <div className="d-flex align-items-center gap-2 text-primary mb-2">
+                <MapPin className="w-4 h-4" />
+                <span className="fw-semibold text-dark small text-uppercase tracking-wider">{t('address')}</span>
+              </div>
+              <div
+                className="fs-6 text-dark whitespace-pre-line bg-white p-3 rounded-2 border border-secondary-subtle"
+                style={{ minHeight: '80px', lineHeight: '1.7' }}
+              >
+                {person.address}
               </div>
             </div>
           </div>
