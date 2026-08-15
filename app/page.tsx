@@ -53,31 +53,50 @@ export default function PublicSearchPage() {
     fetchResults(filters);
   }, [filters, fetchResults]);
 
+  const handleClearAllFilters = () => {
+    setFilters({ q: '' });
+  };
+
   return (
-    <div className="container py-4 py-md-5">
-      {/* Banner */}
-      <div className="text-center mb-4 mb-md-5 max-w-2xl mx-auto">
-        <h2 className="display-6 fw-bold text-dark mb-2">{t('appTitle')}</h2>
-        <p className="lead text-muted fs-6 mb-0">{t('appSubTitle')}</p>
+    <div>
+      {/* Hero Banner with clean spacing & contrast */}
+      <div className="container pt-4 pt-md-5 pb-3">
+        <div className="text-center max-w-2xl mx-auto">
+          <div className="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill bg-white shadow-sm border border-slate-200 mb-2.5">
+            <span className="d-inline-block rounded-circle bg-rkm-orange" style={{ width: '8px', height: '8px' }}></span>
+            <span className="small fw-semibold text-secondary" style={{ fontSize: '0.8125rem' }}>{t('appSubTitle')}</span>
+          </div>
+          <h1 className="display-6 fw-bold text-dark mb-2 tracking-tight">
+            {t('appTitle')}
+          </h1>
+          <p className="lead text-muted fs-6 mb-0">
+            Search and verify initiation records across all person details with instant partial matching.
+          </p>
+        </div>
       </div>
 
-      {/* Search & Filter Form */}
-      <div className="max-w-3xl mx-auto">
-        <SearchForm
-          initialFilters={filters}
-          onSearch={(newFilters) => setFilters(newFilters)}
-          isLoading={isLoading}
-        />
+      {/* Sticky Search & Filter Toolbar */}
+      <div className="sticky-search-wrapper">
+        <div className="container">
+          <div className="max-w-3xl mx-auto">
+            <SearchForm
+              initialFilters={filters}
+              onSearch={(newFilters) => setFilters(newFilters)}
+              isLoading={isLoading}
+            />
+          </div>
+        </div>
       </div>
 
-      {/* Results Container */}
-      <div className="mt-4">
+      {/* 3-Column Results Grid */}
+      <div className="container pb-5">
         <SearchResultList
           results={results}
           total={total}
           isLoading={isLoading}
           error={error}
           onSelectPerson={setSelectedPerson}
+          onClearFilters={handleClearAllFilters}
         />
       </div>
 

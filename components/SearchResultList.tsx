@@ -1,7 +1,8 @@
 'use client';
 
+import React from 'react';
 import { PersonRecord } from '@/types';
-import { AlertCircle, Calendar, Eye, Inbox, MapPin } from 'lucide-react';
+import { AlertCircle, Calendar, ArrowRight, MapPin, Phone, Award, User, SearchX, RotateCcw } from 'lucide-react';
 import { useLanguage } from './LanguageProvider';
 
 interface SearchResultListProps {
@@ -10,6 +11,7 @@ interface SearchResultListProps {
   isLoading: boolean;
   error?: string | null;
   onSelectPerson: (person: PersonRecord) => void;
+  onClearFilters?: () => void;
 }
 
 export default function SearchResultList({
@@ -18,122 +20,211 @@ export default function SearchResultList({
   isLoading,
   error,
   onSelectPerson,
+  onClearFilters,
 }: SearchResultListProps) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   if (isLoading) {
     return (
-      <div className="row g-3">
-        {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="col-12 col-md-6">
-            <div className="card border-0 shadow-sm rounded-4 p-3 placeholder-glow">
-              <div className="d-flex justify-content-between align-items-center mb-2">
-                <span className="placeholder col-3 rounded-pill bg-secondary"></span>
-                <span className="placeholder col-2 rounded-pill bg-light"></span>
+      <div>
+        {/* Skeleton Status Bar */}
+        <div className="results-status-bar mb-3.5 placeholder-glow">
+          <span className="placeholder col-3 rounded py-2 bg-light"></span>
+          <span className="placeholder col-2 rounded py-2 bg-light"></span>
+        </div>
+
+        <div className="row g-3.5">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div key={i} className="col-12 col-md-6 col-lg-4">
+              <div className="persona-card placeholder-glow">
+                <div className="persona-card-body">
+                  <div className="slot-header">
+                    <span className="placeholder col-4 rounded py-1.5 bg-light"></span>
+                    <span className="placeholder col-3 rounded py-1 bg-light"></span>
+                  </div>
+                  <h5 className="placeholder col-8 bg-secondary bg-opacity-25 mb-1.5 rounded py-2"></h5>
+                  <p className="placeholder col-6 bg-light mb-2.5 rounded"></p>
+                  <div className="d-flex gap-1.5 mb-2.5">
+                    <span className="placeholder col-4 rounded py-1 bg-light"></span>
+                    <span className="placeholder col-4 rounded py-1 bg-light"></span>
+                  </div>
+                  <p className="placeholder col-11 bg-light mb-0 rounded"></p>
+                </div>
+                <div className="persona-card-footer">
+                  <span className="placeholder col-3 bg-light"></span>
+                  <span className="placeholder col-2 bg-light"></span>
+                </div>
               </div>
-              <h5 className="placeholder col-7 bg-secondary mb-2 rounded"></h5>
-              <p className="placeholder col-10 bg-light mb-1 rounded"></p>
-              <p className="placeholder col-8 bg-light mb-3 rounded"></p>
-              <div className="placeholder col-4 rounded-pill bg-primary"></div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="card border-danger border-opacity-25 bg-danger bg-opacity-10 rounded-4 p-4 text-center my-4">
-        <AlertCircle className="w-12 h-12 text-danger mx-auto mb-2" />
-        <h5 className="text-danger fw-bold">{t('noResultsTitle')}</h5>
-        <p className="text-danger-emphasis mb-0">{error}</p>
+      <div className="empty-state-card border-danger border-opacity-25 my-4">
+        <div className="empty-state-icon-glow" style={{ color: '#dc2626', background: '#fef2f2', borderColor: '#fecaca' }}>
+          <AlertCircle size={32} />
+        </div>
+        <h4 className="fw-bold text-danger mb-2 fs-5">{t('noResultsTitle')}</h4>
+        <p className="text-muted mb-4 max-w-md mx-auto small">{error}</p>
+        {onClearFilters && (
+          <button
+            type="button"
+            className="btn btn-sm btn-rkm-secondary px-4 py-2"
+            onClick={onClearFilters}
+          >
+            <RotateCcw size={14} />
+            <span>{t('resetBtn')}</span>
+          </button>
+        )}
       </div>
     );
   }
 
   if (results.length === 0) {
     return (
-      <div className="card border-0 shadow-sm rounded-4 p-5 text-center my-4 bg-body">
-        <div className="bg-primary bg-opacity-10 text-primary rounded-circle w-16 h-16 d-flex align-items-center justify-content-center mx-auto mb-3">
-          <Inbox className="w-8 h-8" />
+      <div className="empty-state-card my-4 animate-fade-in">
+        <div className="empty-state-icon-glow">
+          <SearchX size={34} />
         </div>
-        <h4 className="fw-bold text-dark mb-2">{t('noResultsTitle')}</h4>
-        <p className="text-muted mb-0 max-w-md mx-auto">{t('noResultsSub')}</p>
+        <h3 className="h5 fw-bold text-dark mb-2">
+          {language === 'bn' ? 'কোনো দীক্ষিত ভক্তের রেকর্ড পাওয়া যায়নি' : 'No Initiation Records Found'}
+        </h3>
+        <p className="text-muted mb-4 max-w-md mx-auto small" style={{ lineHeight: '1.6' }}>
+          {language === 'bn'
+            ? 'আপনার অনুসন্ধানের সাথে মিলিয়ে কোনো তথ্য খুঁজে পাওয়া যায়নি। অনুগ্রহ করে বানান পরীক্ষা করুন অথবা ইউনিক আইডি বা নামের অংশ দিয়ে অনুসন্ধান করুন।'
+            : "We couldn't find any records matching your search criteria. Try searching with a partial name, Bengali script, or checking for typos."}
+        </p>
+
+        <div className="d-flex justify-content-center flex-wrap gap-2">
+          {onClearFilters && (
+            <button
+              type="button"
+              className="btn-rkm-primary btn-sm px-4 py-2"
+              onClick={onClearFilters}
+            >
+              <RotateCcw size={14} />
+              <span>{t('clearFilters')}</span>
+            </button>
+          )}
+        </div>
       </div>
     );
   }
 
   return (
     <div>
-      <div className="d-flex justify-content-between align-items-center mb-3 px-1">
-        <p className="text-muted mb-0 fw-medium">
-          <span className="badge bg-primary rounded-pill me-1 fs-6">{total}</span>
-          {t('resultsFound')}
-        </p>
+      {/* Modern Results Status Bar */}
+      <div className="results-status-bar">
+        <div className="results-count-pill">
+          <span className="results-count-number">{total}</span>
+          <span className="results-count-text">{t('resultsFound')}</span>
+        </div>
+
+        <div className="d-flex align-items-center gap-2">
+          <span className="live-status-dot"></span>
+          <span className="extra-small fw-semibold text-secondary d-none d-sm-inline" style={{ fontSize: '0.75rem' }}>
+            Live Directory
+          </span>
+        </div>
       </div>
 
-      <div className="row g-3">
+      {/* 3-Column Structured Grid */}
+      <div className="row g-3.5 mb-4">
         {results.map((person) => (
-          <div key={person.id} className="col-12 col-md-6">
+          <div key={person.id} className="col-12 col-md-6 col-lg-4">
             <div
-              className="card border-0 shadow-sm hover-shadow-md rounded-4 transition-all h-100 overflow-hidden cursor-pointer border-start border-4 border-primary"
+              className="persona-card"
               onClick={() => onSelectPerson(person)}
             >
-              <div className="card-body p-4 d-flex flex-column justify-content-between">
-                <div>
-                  <div className="d-flex justify-content-between align-items-center mb-2">
-                    <span className="badge bg-primary bg-opacity-15 text-light border border-primary border-opacity-25 rounded-pill font-mono px-3 py-1 fw-bold fs-6">
-                      {person.unique_id}
+              <div className="persona-card-accent-bar"></div>
+              
+              <div className="persona-card-body">
+                {/* 1. Header Slot: ID & Diksha Date */}
+                <div className="slot-header">
+                  <span className="badge-unique-id">
+                    {person.unique_id}
+                  </span>
+                  {person.diksha_date ? (
+                    <span className="chip-tag chip-orange">
+                      <Calendar size={11} />
+                      <span>{person.diksha_date}</span>
                     </span>
-                    {person.diksha_date && (
-                      <span className="small text-muted d-flex align-items-center gap-1">
-                        <Calendar className="w-3.5 h-3.5" />
-                        {person.diksha_date}
-                      </span>
-                    )}
-                  </div>
-
-                  <h3 className="h5 fw-bold text-dark mb-1">{person.name}</h3>
-
-                  {person.father_or_spouse_name && (
-                    <p className="text-muted small mb-2">
-                      <span className="text-secondary">{t('fatherOrSpouseName')}:</span> {person.father_or_spouse_name}
-                    </p>
+                  ) : (
+                    <span className="chip-tag chip-slate" style={{ opacity: 0.75 }}>
+                      <Calendar size={11} />
+                      <span>{language === 'bn' ? 'তারিখ: —' : 'Date: —'}</span>
+                    </span>
                   )}
+                </div>
 
-                  <div className="d-flex flex-wrap gap-2 mb-2">
-                    {person.diksha_guru && (
-                      <span className="badge bg-secondary bg-opacity-10 text-secondary border rounded-pill px-2 small">
-                        {t('dikshaGuru')}: {person.diksha_guru}
-                      </span>
-                    )}
-                    {person.mobile_number && (
-                      <span className="badge bg-secondary bg-opacity-10 text-secondary border rounded-pill px-2 small font-mono">
-                        {person.mobile_number}
-                      </span>
-                    )}
+                {/* 2. Devotee Name Slot */}
+                <h3 className="slot-name" title={person.name}>
+                  {person.name}
+                </h3>
+
+                {/* 3. Father / Spouse Relation Slot */}
+                <div className="slot-relation" title={person.father_or_spouse_name || ''}>
+                  {person.father_or_spouse_name ? (
+                    <span>
+                      <span className="text-secondary">{t('fatherOrSpouseName')}:</span>{' '}
+                      <span className="text-dark fw-medium">{person.father_or_spouse_name}</span>
+                    </span>
+                  ) : (
+                    <span className="text-muted" style={{ opacity: 0.6 }}>—</span>
+                  )}
+                </div>
+
+                {/* 4. Attributes Slot: Guru & Mobile */}
+                <div className="slot-attributes">
+                  {person.diksha_guru && (
+                    <span className="chip-tag chip-maroon text-truncate" style={{ maxWidth: '140px' }} title={person.diksha_guru}>
+                      <Award size={11} className="flex-shrink-0" />
+                      <span className="text-truncate">{person.diksha_guru}</span>
+                    </span>
+                  )}
+                  {person.mobile_number && (
+                    <span className="chip-tag chip-green font-mono" title={person.mobile_number}>
+                      <Phone size={10} className="flex-shrink-0" />
+                      <span>{person.mobile_number}</span>
+                    </span>
+                  )}
+                  {!person.diksha_guru && !person.mobile_number && (
+                    <span className="chip-tag chip-slate" style={{ opacity: 0.7 }}>
+                      <User size={10} />
+                      <span>{language === 'bn' ? 'দীক্ষিত সদস্য' : 'Initiated Devotee'}</span>
+                    </span>
+                  )}
+                </div>
+
+                {/* 5. Address Slot: Icon Aligned Directly with First Line */}
+                <div className="slot-address" title={person.address}>
+                  <MapPin size={14} className="slot-address-icon" />
+                  <div className="slot-address-text">
+                    {person.address}
                   </div>
-
-                  <p className="text-muted small mb-3 whitespace-pre-line text-truncate-2 d-flex gap-1.5 align-items-start">
-                    <MapPin className="w-4 h-4 text-secondary flex-shrink-0 mt-0.5" />
-                    <span>{person.address}</span>
-                  </p>
                 </div>
+              </div>
 
-                <div className="pt-2 border-top border-light d-flex justify-content-end">
-                  <button
-                    type="button"
-                    className="btn btn-sm btn-outline-primary rounded-pill px-3 d-flex align-items-center gap-1.5 fw-semibold"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onSelectPerson(person);
-                    }}
-                  >
-                    <Eye className="w-4 h-4" />
-                    <span>{t('viewDetails')}</span>
-                  </button>
-                </div>
+              {/* 6. Card Footer Slot */}
+              <div className="persona-card-footer">
+                <span className="text-secondary extra-small fw-medium text-truncate" style={{ fontSize: '0.75rem', maxWidth: '135px' }}>
+                  {person.occupation || person.education || (language === 'bn' ? 'দীক্ষিত ভক্ত' : 'Devotee')}
+                </span>
+                <button
+                  type="button"
+                  className="btn btn-sm btn-link text-decoration-none text-dark fw-bold p-0 d-flex align-items-center gap-1 hover-text-primary flex-shrink-0"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onSelectPerson(person);
+                  }}
+                >
+                  <span style={{ fontSize: '0.8125rem' }}>{t('viewDetails')}</span>
+                  <ArrowRight size={13} />
+                </button>
               </div>
             </div>
           </div>

@@ -48,17 +48,17 @@ export default function ImportPreviewTable({
   };
 
   return (
-    <div className="card border-0 shadow-sm rounded-4 overflow-hidden mb-4 bg-body">
+    <div className="saas-table-container mb-4">
       {/* Header */}
-      <div className="card-header bg-dark text-white p-4 border-0 d-flex flex-wrap align-items-center justify-content-between gap-3">
+      <div className="p-4 bg-white border-bottom d-flex flex-wrap align-items-center justify-content-between gap-3">
         <div>
-          <h4 className="fw-bold text-white mb-1">{t('previewTitle')}</h4>
-          <p className="small text-white-50 mb-0">{t('previewSub')}</p>
+          <h4 className="fw-bold text-dark mb-1 fs-5">{t('previewTitle')}</h4>
+          <p className="small text-muted mb-0">{t('previewSub')}</p>
         </div>
 
         <button
           type="button"
-          className="btn btn-success rounded-pill px-4 py-2 fw-semibold d-flex align-items-center gap-2 shadow"
+          className="btn-rkm-primary btn-sm px-4 py-2"
           onClick={handleImportClick}
           disabled={isImporting || selectedCount === 0}
         >
@@ -69,7 +69,7 @@ export default function ImportPreviewTable({
             </>
           ) : (
             <>
-              <Database className="w-5 h-5" />
+              <Database size={16} />
               <span>
                 {t('importConfirmed')} ({selectedCount})
               </span>
@@ -78,14 +78,14 @@ export default function ImportPreviewTable({
         </button>
       </div>
 
-      <div className="card-body p-4">
-        {/* Summary Pill Badges */}
-        <div className="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4 p-3 bg-light rounded-3 border">
-          <div className="d-flex flex-wrap align-items-center gap-2">
+      <div className="p-4">
+        {/* Summary Filter Pills */}
+        <div className="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4 p-2.5 bg-light rounded-3 border border-slate-200">
+          <div className="d-flex flex-wrap align-items-center gap-1.5">
             <button
               type="button"
-              className={`btn btn-sm rounded-pill fw-semibold ${
-                filter === 'all' ? 'btn-dark' : 'btn-outline-dark'
+              className={`btn btn-sm rounded-pill fw-semibold px-3 ${
+                filter === 'all' ? 'btn-dark' : 'btn-outline-secondary border-0 text-dark'
               }`}
               onClick={() => setFilter('all')}
             >
@@ -93,33 +93,33 @@ export default function ImportPreviewTable({
             </button>
             <button
               type="button"
-              className={`btn btn-sm rounded-pill fw-semibold ${
-                filter === 'valid' ? 'btn-success text-white' : 'btn-outline-success'
+              className={`btn btn-sm rounded-pill fw-semibold px-3 ${
+                filter === 'valid' ? 'btn-success text-white' : 'btn-outline-secondary border-0 text-dark'
               }`}
               onClick={() => setFilter('valid')}
             >
-              <CheckCircle className="w-4 h-4 me-1 d-inline" />
+              <CheckCircle size={14} className="me-1 d-inline" />
               Valid: {summary.validCount}
             </button>
             <button
               type="button"
-              className={`btn btn-sm rounded-pill fw-semibold ${
-                filter === 'duplicate' ? 'btn-warning text-dark' : 'btn-outline-warning'
+              className={`btn btn-sm rounded-pill fw-semibold px-3 ${
+                filter === 'duplicate' ? 'btn-warning text-dark' : 'btn-outline-secondary border-0 text-dark'
               }`}
               onClick={() => setFilter('duplicate')}
             >
-              <AlertTriangle className="w-4 h-4 me-1 d-inline" />
+              <AlertTriangle size={14} className="me-1 d-inline" />
               Duplicate: {summary.duplicateCount}
             </button>
             {summary.invalidCount > 0 && (
               <button
                 type="button"
-                className={`btn btn-sm rounded-pill fw-semibold ${
-                  filter === 'invalid' ? 'btn-danger text-white' : 'btn-outline-danger'
+                className={`btn btn-sm rounded-pill fw-semibold px-3 ${
+                  filter === 'invalid' ? 'btn-danger text-white' : 'btn-outline-secondary border-0 text-dark'
                 }`}
                 onClick={() => setFilter('invalid')}
               >
-                <XCircle className="w-4 h-4 me-1 d-inline" />
+                <XCircle size={14} className="me-1 d-inline" />
                 Invalid: {summary.invalidCount}
               </button>
             )}
@@ -127,36 +127,36 @@ export default function ImportPreviewTable({
 
           <button
             type="button"
-            className="btn btn-sm btn-outline-primary rounded-pill d-flex align-items-center gap-1.5 fw-semibold"
+            className="btn btn-sm btn-outline-secondary rounded-pill d-flex align-items-center gap-1.5 fw-semibold px-3"
             onClick={toggleSelectAllValid}
           >
-            <CheckSquare className="w-4 h-4" />
-            <span>Select/Deselect All Valid</span>
+            <CheckSquare size={14} />
+            <span>Select All Valid</span>
           </button>
         </div>
 
-        {/* Records Preview Table */}
-        <div className="table-responsive rounded-3 border">
-          <table className="table table-hover align-middle mb-0">
-            <thead className="table-dark">
+        {/* Table */}
+        <div className="table-responsive border rounded-3 overflow-hidden">
+          <table className="saas-table align-middle">
+            <thead>
               <tr>
-                <th style={{ width: '50px' }} className="text-center">
-                  Select
+                <th style={{ width: '45px' }} className="text-center">
+                  #
                 </th>
-                <th style={{ width: '140px' }}>{t('uniqueId')}</th>
-                <th style={{ width: '160px' }}>{t('name')}</th>
-                <th style={{ width: '140px' }}>{t('fatherOrSpouseName')}</th>
-                <th style={{ width: '105px' }}>{t('mobileNumber')}</th>
-                <th style={{ width: '105px' }}>{t('dikshaDate')}</th>
-                <th style={{ width: '120px' }}>{t('dikshaGuru')}</th>
+                <th style={{ width: '130px' }}>{t('uniqueId')}</th>
+                <th style={{ width: '170px' }}>{t('name')}</th>
+                <th style={{ width: '150px' }}>{t('fatherOrSpouseName')}</th>
+                <th style={{ width: '115px' }}>{t('mobileNumber')}</th>
+                <th style={{ width: '110px' }}>{t('dikshaDate')}</th>
+                <th style={{ width: '140px' }}>{t('dikshaGuru')}</th>
                 <th>{t('address')}</th>
-                <th style={{ width: '120px' }}>Status</th>
+                <th style={{ width: '110px' }}>Status</th>
               </tr>
             </thead>
             <tbody>
               {filteredRecords.length === 0 ? (
                 <tr>
-                  <td colSpan={10} className="text-center py-4 text-muted">
+                  <td colSpan={10} className="text-center py-4 text-muted small">
                     No records found for the selected status filter.
                   </td>
                 </tr>
@@ -166,50 +166,46 @@ export default function ImportPreviewTable({
                     <td className="text-center">
                       <button
                         type="button"
-                        className="btn btn-link p-0 text-primary border-0"
+                        className="btn btn-link p-0 text-dark border-0"
                         onClick={() => toggleSelect(rec.tempId)}
                         disabled={rec.status === 'invalid'}
                       >
                         {rec.selected ? (
-                          <CheckSquare className="w-5 h-5 text-primary" />
+                          <CheckSquare size={18} className="text-primary" />
                         ) : (
-                          <Square className="w-5 h-5 text-muted" />
+                          <Square size={18} className="text-muted" />
                         )}
                       </button>
                     </td>
                     <td>
-                      <span className="font-mono fw-bold badge bg-primary bg-opacity-15 text-light border border-primary border-opacity-25 px-2.5 py-1.5 fs-6">
+                      <span className="badge-unique-id">
                         {rec.unique_id}
                       </span>
                     </td>
-                    <td className="fw-semibold text-dark">{rec.name}</td>
+                    <td className="fw-bold text-dark">{rec.name}</td>
                     <td className="small text-secondary">{rec.father_or_spouse_name || '—'}</td>
                     <td className="small font-mono">{rec.mobile_number || '—'}</td>
                     <td className="small">{rec.diksha_date || '—'}</td>
                     <td className="small">{rec.diksha_guru || '—'}</td>
-                    <td className="whitespace-pre-line small text-secondary" style={{ maxWidth: '180px' }}>{rec.address}</td>
+                    <td className="whitespace-pre-line small text-secondary text-truncate-2" style={{ maxWidth: '200px' }}>
+                      {rec.address}
+                    </td>
                     <td>
                       {rec.status === 'valid' && (
-                        <span className="badge bg-success bg-opacity-15 text-success border border-success border-opacity-25 rounded-pill px-3 py-1 d-inline-flex align-items-center gap-1">
-                          <CheckCircle className="w-3.5 h-3.5" />
+                        <span className="chip-tag chip-green">
+                          <CheckCircle size={12} />
                           <span>{t('statusValid')}</span>
                         </span>
                       )}
                       {rec.status === 'duplicate' && (
-                        <span
-                          className="badge bg-warning bg-opacity-20 text-warning-emphasis border border-warning rounded-pill px-3 py-1 d-inline-flex align-items-center gap-1"
-                          title={rec.errorMessage}
-                        >
-                          <AlertTriangle className="w-3.5 h-3.5" />
+                        <span className="chip-tag chip-orange" title={rec.errorMessage}>
+                          <AlertTriangle size={12} />
                           <span>{t('statusDuplicate')}</span>
                         </span>
                       )}
                       {rec.status === 'invalid' && (
-                        <span
-                          className="badge bg-danger bg-opacity-15 text-danger border border-danger rounded-pill px-3 py-1 d-inline-flex align-items-center gap-1"
-                          title={rec.errorMessage}
-                        >
-                          <XCircle className="w-3.5 h-3.5" />
+                        <span className="chip-tag chip-maroon" title={rec.errorMessage}>
+                          <XCircle size={12} />
                           <span>{t('statusInvalid')}</span>
                         </span>
                       )}

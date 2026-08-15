@@ -110,46 +110,49 @@ export default function PersonFormModal({
 
   return (
     <div
-      className="modal fade show d-block bg-dark bg-opacity-50 animate-fade-in"
-      tabIndex={-1}
+      className="modal-backdrop-custom"
+      onClick={onClose}
       role="dialog"
       aria-modal="true"
-      onClick={onClose}
     >
       <div
-        className="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable"
+        className="modal-dialog-modern animate-fade-in"
         onClick={(e) => e.stopPropagation()}
       >
-        <form onSubmit={handleSubmit} className="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
-          <div className="modal-header bg-primary text-white border-0 py-3 px-4">
-            <h5 className="modal-title fw-bold mb-0">
+        <form onSubmit={handleSubmit} className="d-flex flex-column h-100 overflow-hidden">
+          {/* Header */}
+          <div className="modal-header-modern">
+            <h5 className="modal-title fs-6 fw-bold mb-0 text-white">
               {person ? t('editPerson') : t('addNewPerson')}
             </h5>
             <button
               type="button"
-              className="btn-close btn-close-white"
+              className="btn btn-sm btn-icon-ghost text-white-50 hover-text-white border-0"
               onClick={onClose}
               aria-label="Close"
-            ></button>
+            >
+              <X size={20} />
+            </button>
           </div>
 
-          <div className="modal-body p-4">
+          {/* Body */}
+          <div className="modal-body-modern">
             {error && (
-              <div className="alert alert-danger d-flex align-items-center gap-2 mb-4 rounded-3">
-                <AlertCircle className="w-5 h-5 flex-shrink-0" />
+              <div className="alert alert-danger d-flex align-items-center gap-2 mb-3 py-2 px-3 rounded-3 small">
+                <AlertCircle size={16} className="flex-shrink-0" />
                 <span>{error}</span>
               </div>
             )}
 
             <div className="row g-3">
               {/* Unique ID */}
-              <div className="col-md-4">
-                <label className="form-label fw-semibold text-dark">
+              <div className="col-12 col-md-4">
+                <label className="form-label-custom">
                   {t('uniqueId')} <span className="text-danger">*</span>
                 </label>
                 <input
                   type="text"
-                  className="form-control rounded-3"
+                  className="form-control-custom font-mono"
                   placeholder="e.g. সিএ১২৩৪৫৬ or DA6140"
                   value={uniqueId}
                   onChange={(e) => setUniqueId(e.target.value)}
@@ -158,11 +161,11 @@ export default function PersonFormModal({
               </div>
 
               {/* Diksha Date */}
-              <div className="col-md-4">
-                <label className="form-label fw-semibold text-dark">{t('dikshaDate')}</label>
+              <div className="col-12 col-md-4">
+                <label className="form-label-custom">{t('dikshaDate')}</label>
                 <input
                   type="text"
-                  className="form-control rounded-3"
+                  className="form-control-custom"
                   placeholder="e.g. 12-05-2020 or ১২/০৫/২০২০"
                   value={dikshaDate}
                   onChange={(e) => setDikshaDate(e.target.value)}
@@ -170,11 +173,11 @@ export default function PersonFormModal({
               </div>
 
               {/* Diksha Guru */}
-              <div className="col-md-4">
-                <label className="form-label fw-semibold text-dark">{t('dikshaGuru')}</label>
+              <div className="col-12 col-md-4">
+                <label className="form-label-custom">{t('dikshaGuru')}</label>
                 <input
                   type="text"
-                  className="form-control rounded-3"
+                  className="form-control-custom"
                   placeholder="e.g. Swami Vivekananda"
                   value={dikshaGuru}
                   onChange={(e) => setDikshaGuru(e.target.value)}
@@ -182,13 +185,13 @@ export default function PersonFormModal({
               </div>
 
               {/* Name */}
-              <div className="col-md-6">
-                <label className="form-label fw-semibold text-dark">
+              <div className="col-12 col-md-6">
+                <label className="form-label-custom">
                   {t('name')} <span className="text-danger">*</span>
                 </label>
                 <input
                   type="text"
-                  className="form-control rounded-3"
+                  className="form-control-custom"
                   placeholder="e.g. শ্রীপ্রদীপ দে or Sri Dhiman Bhowmik"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
@@ -197,11 +200,11 @@ export default function PersonFormModal({
               </div>
 
               {/* Father / Spouse Name */}
-              <div className="col-md-6">
-                <label className="form-label fw-semibold text-dark">{t('fatherOrSpouseName')}</label>
+              <div className="col-12 col-md-6">
+                <label className="form-label-custom">{t('fatherOrSpouseName')}</label>
                 <input
                   type="text"
-                  className="form-control rounded-3"
+                  className="form-control-custom"
                   placeholder="e.g. শ্রী সুবিনয় রায়"
                   value={fatherOrSpouseName}
                   onChange={(e) => setFatherOrSpouseName(e.target.value)}
@@ -209,11 +212,11 @@ export default function PersonFormModal({
               </div>
 
               {/* Age */}
-              <div className="col-md-3">
-                <label className="form-label fw-semibold text-dark">{t('age')}</label>
+              <div className="col-6 col-md-3">
+                <label className="form-label-custom">{t('age')}</label>
                 <input
                   type="text"
-                  className="form-control rounded-3"
+                  className="form-control-custom"
                   placeholder="e.g. 45"
                   value={age}
                   onChange={(e) => setAge(e.target.value)}
@@ -221,11 +224,11 @@ export default function PersonFormModal({
               </div>
 
               {/* Mobile Number */}
-              <div className="col-md-4">
-                <label className="form-label fw-semibold text-dark">{t('mobileNumber')}</label>
+              <div className="col-6 col-md-3">
+                <label className="form-label-custom">{t('mobileNumber')}</label>
                 <input
                   type="text"
-                  className="form-control rounded-3"
+                  className="form-control-custom font-mono"
                   placeholder="e.g. 01712345678"
                   value={mobileNumber}
                   onChange={(e) => setMobileNumber(e.target.value)}
@@ -233,24 +236,24 @@ export default function PersonFormModal({
               </div>
 
               {/* Occupation */}
-              <div className="col-md-5">
-                <label className="form-label fw-semibold text-dark">{t('occupation')}</label>
+              <div className="col-12 col-md-3">
+                <label className="form-label-custom">{t('occupation')}</label>
                 <input
                   type="text"
-                  className="form-control rounded-3"
-                  placeholder="e.g. ব্যবসায়ী / Teacher"
+                  className="form-control-custom"
+                  placeholder="e.g. Teacher"
                   value={occupation}
                   onChange={(e) => setOccupation(e.target.value)}
                 />
               </div>
 
               {/* Education */}
-              <div className="col-md-6">
-                <label className="form-label fw-semibold text-dark">{t('education')}</label>
+              <div className="col-12 col-md-3">
+                <label className="form-label-custom">{t('education')}</label>
                 <input
                   type="text"
-                  className="form-control rounded-3"
-                  placeholder="e.g. স্নাতক / B.Sc."
+                  className="form-control-custom"
+                  placeholder="e.g. B.Sc."
                   value={education}
                   onChange={(e) => setEducation(e.target.value)}
                 />
@@ -258,11 +261,11 @@ export default function PersonFormModal({
 
               {/* Address */}
               <div className="col-12">
-                <label className="form-label fw-semibold text-dark">
+                <label className="form-label-custom">
                   {t('address')} <span className="text-danger">*</span>
                 </label>
                 <textarea
-                  className="form-control rounded-3"
+                  className="form-control-custom"
                   rows={3}
                   placeholder="Enter full multiline address..."
                   value={address}
@@ -273,19 +276,19 @@ export default function PersonFormModal({
             </div>
           </div>
 
-          <div className="modal-footer bg-light border-0 py-3 px-4">
+          {/* Footer */}
+          <div className="px-4 py-3 bg-light border-top border-slate-200 d-flex justify-content-end gap-2">
             <button
               type="button"
-              className="btn btn-outline-secondary px-4 rounded-pill"
+              className="btn btn-sm btn-rkm-secondary px-3"
               onClick={onClose}
               disabled={isLoading}
             >
-              <X className="w-4 h-4 me-1" />
               {t('cancel')}
             </button>
             <button
               type="submit"
-              className="btn btn-primary px-4 rounded-pill d-flex align-items-center gap-1.5 shadow-sm"
+              className="btn-rkm-primary btn-sm px-4"
               disabled={isLoading}
             >
               {isLoading ? (
@@ -295,7 +298,7 @@ export default function PersonFormModal({
                 </>
               ) : (
                 <>
-                  <Save className="w-4 h-4" />
+                  <Save size={15} />
                   <span>{t('save')}</span>
                 </>
               )}

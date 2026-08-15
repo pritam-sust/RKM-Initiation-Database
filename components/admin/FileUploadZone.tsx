@@ -53,11 +53,11 @@ export default function FileUploadZone({
   };
 
   return (
-    <div className="card border-0 shadow-sm rounded-4 overflow-hidden mb-4 bg-body">
-      <div className="card-body p-4 p-md-5">
+    <div className="rkm-card mb-4">
+      <div className="p-4 p-md-5">
         <div
-          className={`border-2 border-dashed rounded-4 p-4 text-center transition-all ${
-            dragActive ? 'border-primary bg-primary bg-opacity-10' : 'border-secondary-subtle bg-light'
+          className={`border border-2 border-dashed rounded-4 p-5 text-center transition-all ${
+            dragActive ? 'border-primary bg-light' : 'border-slate-300 bg-slate-50'
           }`}
           onDragEnter={handleDrag}
           onDragOver={handleDrag}
@@ -74,16 +74,19 @@ export default function FileUploadZone({
             onChange={handleChange}
           />
 
-          <div className="bg-primary bg-opacity-15 text-primary rounded-circle w-16 h-16 d-flex align-items-center justify-content-center mx-auto mb-3">
-            <UploadCloud className="w-8 h-8" />
+          <div
+            className="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3"
+            style={{ width: '4rem', height: '4rem', backgroundColor: 'var(--rkm-orange-light)', color: 'var(--rkm-orange)' }}
+          >
+            <UploadCloud size={32} />
           </div>
 
-          <h4 className="fw-bold text-dark mb-2">{t('uploadTitle')}</h4>
+          <h4 className="fw-bold text-dark mb-1 fs-5">{t('uploadTitle')}</h4>
           <p className="text-muted mb-3 max-w-md mx-auto small">{t('uploadSub')}</p>
 
           <button
             type="button"
-            className="btn btn-outline-primary rounded-pill px-4 fw-semibold"
+            className="btn btn-sm btn-rkm-secondary px-4 py-2"
             onClick={(e) => {
               e.stopPropagation();
               fileInputRef.current?.click();
@@ -94,14 +97,17 @@ export default function FileUploadZone({
         </div>
 
         {selectedFile && (
-          <div className="mt-4 p-3 bg-light rounded-3 border border-secondary-subtle d-flex flex-wrap align-items-center justify-content-between gap-3">
+          <div className="mt-4 p-3 bg-light rounded-3 border border-slate-200 d-flex flex-wrap align-items-center justify-content-between gap-3">
             <div className="d-flex align-items-center gap-3">
-              <div className="bg-primary text-white p-2 rounded-3">
-                <FileText className="w-6 h-6" />
+              <div
+                className="rounded-3 d-flex align-items-center justify-content-center"
+                style={{ width: '2.5rem', height: '2.5rem', backgroundColor: 'var(--rkm-blue-light)', color: 'var(--rkm-blue)' }}
+              >
+                <FileText size={22} />
               </div>
               <div>
-                <h6 className="fw-bold mb-0 text-dark">{selectedFile.name}</h6>
-                <span className="small text-muted font-mono">
+                <h6 className="fw-bold mb-0 text-dark fs-6">{selectedFile.name}</h6>
+                <span className="small text-muted font-mono" style={{ fontSize: '0.75rem' }}>
                   {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB
                 </span>
               </div>
@@ -109,7 +115,7 @@ export default function FileUploadZone({
 
             <button
               type="button"
-              className="btn btn-primary rounded-pill px-4 py-2 fw-semibold d-flex align-items-center gap-2 shadow-sm"
+              className="btn-rkm-primary btn-sm px-4 py-2"
               onClick={handleStartParse}
               disabled={isLoading}
             >
@@ -120,7 +126,7 @@ export default function FileUploadZone({
                 </>
               ) : (
                 <>
-                  <CheckCircle2 className="w-4 h-4" />
+                  <CheckCircle2 size={16} />
                   <span>Parse & Preview</span>
                 </>
               )}
@@ -129,8 +135,8 @@ export default function FileUploadZone({
         )}
 
         {error && (
-          <div className="alert alert-danger d-flex align-items-center gap-2 mt-4 rounded-3 mb-0">
-            <AlertCircle className="w-5 h-5 flex-shrink-0" />
+          <div className="alert alert-danger d-flex align-items-center gap-2 mt-4 rounded-3 mb-0 small">
+            <AlertCircle size={16} className="flex-shrink-0" />
             <span>{error}</span>
           </div>
         )}

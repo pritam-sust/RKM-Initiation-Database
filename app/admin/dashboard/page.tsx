@@ -6,7 +6,7 @@ import PersonFormModal from '@/components/admin/PersonFormModal';
 import { useLanguage } from '@/components/LanguageProvider';
 import PersonDetailModal from '@/components/PersonDetailModal';
 import { PersonRecord, PersonFilterOptions } from '@/types';
-import { ChevronLeft, ChevronRight, Edit2, Eye, Plus, Search, Trash2, Users, SlidersHorizontal, RotateCcw, ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Edit3, Eye, Plus, Search, Trash2, Users, SlidersHorizontal, RotateCcw, ChevronDown, ChevronUp, Calendar, Award, Phone } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 
@@ -129,84 +129,74 @@ export default function AdminDashboardPage() {
       <AdminNavbar onAddPerson={handleOpenAdd} />
 
       <div className="container pb-5">
-        {/* Top Summary & Search Banner */}
+        {/* Top Metric & Search Toolbar */}
         <div className="row g-3 mb-4">
-          <div className="col-12 col-md-4">
-            <div className="card border-0 shadow-sm rounded-4 p-4 bg-primary text-white">
-              <div className="d-flex align-items-center justify-content-between">
-                <div>
-                  <span className="small text-white-50 text-uppercase fw-semibold tracking-wider d-block mb-1">
-                    {t('totalRecords')}
-                  </span>
-                  <h3 className="display-6 fw-bold mb-0 text-white">{total}</h3>
-                </div>
-                <div className="bg-white bg-opacity-20 p-3 rounded-circle text-white">
-                  <Users className="w-8 h-8" />
-                </div>
+          <div className="col-12 col-md-4 col-lg-3">
+            <div className="stat-card-modern h-100">
+              <div>
+                <span className="form-label-custom mb-1">{t('totalRecords')}</span>
+                <h2 className="display-6 fw-bold text-dark mb-0 tracking-tight">{total}</h2>
+              </div>
+              <div className="stat-icon-wrapper stat-icon-blue">
+                <Users size={24} />
               </div>
             </div>
           </div>
 
-          <div className="col-12 col-md-8">
-            <div className="card border-0 shadow-sm rounded-4 p-3 bg-body h-100 d-flex flex-column justify-content-center">
-              <div className="input-group input-group-lg border rounded-3 overflow-hidden">
-                <span className="input-group-text bg-white border-0 text-muted">
-                  <Search className="w-5 h-5" />
-                </span>
-                <input
-                  type="text"
-                  className="form-control border-0 shadow-none fs-6"
-                  placeholder={t('searchAllFieldsPlaceholder')}
-                  value={filters.q || ''}
-                  onChange={(e) => handleGlobalQueryChange(e.target.value)}
-                />
+          <div className="col-12 col-md-8 col-lg-9">
+            <div className="search-container-box h-100">
+              <div className="ps-2 pe-1 text-muted">
+                <Search size={20} className="text-secondary" />
+              </div>
+              <input
+                type="text"
+                className="search-input-field flex-grow-1"
+                placeholder={t('searchAllFieldsPlaceholder')}
+                value={filters.q || ''}
+                onChange={(e) => handleGlobalQueryChange(e.target.value)}
+              />
+              <button
+                type="button"
+                className={`btn btn-sm d-flex align-items-center gap-1.5 px-3 py-2 rounded-3 border transition-all ${
+                  showAdvanced || activeFilterCount > 0
+                    ? 'btn-light border-secondary text-dark fw-bold'
+                    : 'btn-light border-slate-200 text-secondary'
+                }`}
+                onClick={() => setShowAdvanced(!showAdvanced)}
+                title={t('filters')}
+              >
+                <SlidersHorizontal size={15} />
+                <span className="d-none d-sm-inline">{t('filters')}</span>
+                {activeFilterCount > 0 && (
+                  <span className="badge rounded-pill bg-dark text-white px-2 py-0.5" style={{ fontSize: '0.7rem' }}>
+                    {activeFilterCount}
+                  </span>
+                )}
+                {showAdvanced ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+              </button>
+              {(filters.q || activeFilterCount > 0) && (
                 <button
                   type="button"
-                  className={`btn border-0 d-flex align-items-center gap-1.5 px-3 ${
-                    showAdvanced || activeFilterCount > 0
-                      ? 'btn-light text-primary fw-semibold'
-                      : 'btn-light text-secondary'
-                  }`}
-                  onClick={() => setShowAdvanced(!showAdvanced)}
-                  title={t('filters')}
+                  className="btn-icon-ghost text-danger"
+                  onClick={handleClearFilters}
+                  title={t('clearFilters')}
                 >
-                  <SlidersHorizontal className="w-4 h-4" />
-                  <span className="d-none d-sm-inline">{t('filters')}</span>
-                  {activeFilterCount > 0 && (
-                    <span className="badge bg-primary text-white rounded-pill px-2">
-                      {activeFilterCount}
-                    </span>
-                  )}
-                  {showAdvanced ? (
-                    <ChevronUp className="w-3.5 h-3.5" />
-                  ) : (
-                    <ChevronDown className="w-3.5 h-3.5" />
-                  )}
+                  <RotateCcw size={16} />
                 </button>
-                {(filters.q || activeFilterCount > 0) && (
-                  <button
-                    type="button"
-                    className="btn btn-light text-danger"
-                    onClick={handleClearFilters}
-                    title={t('clearFilters')}
-                  >
-                    <RotateCcw className="w-4 h-4" />
-                  </button>
-                )}
-              </div>
+              )}
             </div>
           </div>
         </div>
 
         {/* Expandable Advanced Filters for Admin */}
         {showAdvanced && (
-          <div className="card border-0 shadow-sm rounded-4 mb-4 p-3 p-md-4 bg-body animate-fade-in">
-            <div className="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
+          <div className="filter-drawer-card mb-4 animate-fade-in">
+            <div className="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom border-light">
               <div className="d-flex align-items-center gap-2">
-                <SlidersHorizontal className="w-4 h-4 text-primary" />
-                <span className="fw-bold text-dark">{t('advancedFilters')}</span>
+                <SlidersHorizontal size={16} className="text-secondary" />
+                <span className="fw-bold text-dark fs-6">{t('advancedFilters')}</span>
                 {activeFilterCount > 0 && (
-                  <span className="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill">
+                  <span className="chip-tag chip-orange">
                     {activeFilterCount} {t('activeFiltersCount')}
                   </span>
                 )}
@@ -217,7 +207,7 @@ export default function AdminDashboardPage() {
                   className="btn btn-link btn-sm text-danger text-decoration-none p-0 d-flex align-items-center gap-1"
                   onClick={handleClearFilters}
                 >
-                  <RotateCcw className="w-3.5 h-3.5" />
+                  <RotateCcw size={14} />
                   <span>{t('clearFilters')}</span>
                 </button>
               )}
@@ -225,10 +215,10 @@ export default function AdminDashboardPage() {
 
             <div className="row g-3">
               <div className="col-12 col-sm-6 col-lg-4">
-                <label className="form-label small fw-semibold text-secondary mb-1">{t('uniqueId')}</label>
+                <label className="form-label-custom">{t('uniqueId')}</label>
                 <input
                   type="text"
-                  className="form-control form-control-sm rounded-3"
+                  className="form-control-custom font-mono"
                   placeholder={t('uniqueId')}
                   value={filters.unique_id || ''}
                   onChange={(e) => handleFieldChange('unique_id', e.target.value)}
@@ -236,10 +226,10 @@ export default function AdminDashboardPage() {
               </div>
 
               <div className="col-12 col-sm-6 col-lg-4">
-                <label className="form-label small fw-semibold text-secondary mb-1">{t('name')}</label>
+                <label className="form-label-custom">{t('name')}</label>
                 <input
                   type="text"
-                  className="form-control form-control-sm rounded-3"
+                  className="form-control-custom"
                   placeholder={t('name')}
                   value={filters.name || ''}
                   onChange={(e) => handleFieldChange('name', e.target.value)}
@@ -247,10 +237,10 @@ export default function AdminDashboardPage() {
               </div>
 
               <div className="col-12 col-sm-6 col-lg-4">
-                <label className="form-label small fw-semibold text-secondary mb-1">{t('fatherOrSpouseName')}</label>
+                <label className="form-label-custom">{t('fatherOrSpouseName')}</label>
                 <input
                   type="text"
-                  className="form-control form-control-sm rounded-3"
+                  className="form-control-custom"
                   placeholder={t('fatherOrSpouseName')}
                   value={filters.father_or_spouse_name || ''}
                   onChange={(e) => handleFieldChange('father_or_spouse_name', e.target.value)}
@@ -258,10 +248,10 @@ export default function AdminDashboardPage() {
               </div>
 
               <div className="col-12 col-sm-6 col-lg-3">
-                <label className="form-label small fw-semibold text-secondary mb-1">{t('age')}</label>
+                <label className="form-label-custom">{t('age')}</label>
                 <input
                   type="text"
-                  className="form-control form-control-sm rounded-3"
+                  className="form-control-custom"
                   placeholder={t('age')}
                   value={filters.age || ''}
                   onChange={(e) => handleFieldChange('age', e.target.value)}
@@ -269,10 +259,10 @@ export default function AdminDashboardPage() {
               </div>
 
               <div className="col-12 col-sm-6 col-lg-3">
-                <label className="form-label small fw-semibold text-secondary mb-1">{t('mobileNumber')}</label>
+                <label className="form-label-custom">{t('mobileNumber')}</label>
                 <input
                   type="text"
-                  className="form-control form-control-sm rounded-3"
+                  className="form-control-custom font-mono"
                   placeholder={t('mobileNumber')}
                   value={filters.mobile_number || ''}
                   onChange={(e) => handleFieldChange('mobile_number', e.target.value)}
@@ -280,10 +270,10 @@ export default function AdminDashboardPage() {
               </div>
 
               <div className="col-12 col-sm-6 col-lg-3">
-                <label className="form-label small fw-semibold text-secondary mb-1">{t('dikshaGuru')}</label>
+                <label className="form-label-custom">{t('dikshaGuru')}</label>
                 <input
                   type="text"
-                  className="form-control form-control-sm rounded-3"
+                  className="form-control-custom"
                   placeholder={t('dikshaGuru')}
                   value={filters.diksha_guru || ''}
                   onChange={(e) => handleFieldChange('diksha_guru', e.target.value)}
@@ -291,10 +281,10 @@ export default function AdminDashboardPage() {
               </div>
 
               <div className="col-12 col-sm-6 col-lg-3">
-                <label className="form-label small fw-semibold text-secondary mb-1">{t('dikshaDate')}</label>
+                <label className="form-label-custom">{t('dikshaDate')}</label>
                 <input
                   type="text"
-                  className="form-control form-control-sm rounded-3"
+                  className="form-control-custom"
                   placeholder={t('dikshaDate')}
                   value={filters.diksha_date || ''}
                   onChange={(e) => handleFieldChange('diksha_date', e.target.value)}
@@ -302,10 +292,10 @@ export default function AdminDashboardPage() {
               </div>
 
               <div className="col-12 col-sm-6 col-lg-4">
-                <label className="form-label small fw-semibold text-secondary mb-1">{t('occupation')}</label>
+                <label className="form-label-custom">{t('occupation')}</label>
                 <input
                   type="text"
-                  className="form-control form-control-sm rounded-3"
+                  className="form-control-custom"
                   placeholder={t('occupation')}
                   value={filters.occupation || ''}
                   onChange={(e) => handleFieldChange('occupation', e.target.value)}
@@ -313,10 +303,10 @@ export default function AdminDashboardPage() {
               </div>
 
               <div className="col-12 col-sm-6 col-lg-4">
-                <label className="form-label small fw-semibold text-secondary mb-1">{t('education')}</label>
+                <label className="form-label-custom">{t('education')}</label>
                 <input
                   type="text"
-                  className="form-control form-control-sm rounded-3"
+                  className="form-control-custom"
                   placeholder={t('education')}
                   value={filters.education || ''}
                   onChange={(e) => handleFieldChange('education', e.target.value)}
@@ -324,10 +314,10 @@ export default function AdminDashboardPage() {
               </div>
 
               <div className="col-12 col-sm-6 col-lg-4">
-                <label className="form-label small fw-semibold text-secondary mb-1">{t('address')}</label>
+                <label className="form-label-custom">{t('address')}</label>
                 <input
                   type="text"
-                  className="form-control form-control-sm rounded-3"
+                  className="form-control-custom"
                   placeholder={t('address')}
                   value={filters.address || ''}
                   onChange={(e) => handleFieldChange('address', e.target.value)}
@@ -338,118 +328,151 @@ export default function AdminDashboardPage() {
         )}
 
         {/* Records Table Card */}
-        <div className="card border-0 shadow-sm rounded-4 overflow-hidden bg-body">
-          <div className="card-header bg-white py-3 px-4 border-0 d-flex align-items-center justify-content-between">
-            <h5 className="fw-bold text-dark mb-0">{t('adminDashboard')}</h5>
+        <div className="saas-table-container">
+          <div className="p-3.5 px-4 bg-white border-bottom d-flex align-items-center justify-content-between">
+            <h5 className="fw-bold text-dark mb-0 fs-6">{t('adminDashboard')}</h5>
             <button
               type="button"
-              className="btn btn-primary btn-sm rounded-pill px-3 fw-semibold d-flex align-items-center gap-1.5"
+              className="btn-rkm-primary btn-sm px-3.5"
               onClick={handleOpenAdd}
             >
-              <Plus className="w-4 h-4" />
+              <Plus size={16} />
               <span>{t('addNewPerson')}</span>
             </button>
           </div>
 
-          <div className="card-body p-0">
+          <div className="table-responsive">
             {isLoading ? (
               <div className="text-center py-5">
-                <div className="spinner-border text-primary" role="status">
+                <div className="spinner-border text-secondary" role="status">
                   <span className="visually-hidden">Loading...</span>
                 </div>
               </div>
             ) : persons.length === 0 ? (
-              <div className="text-center py-5 text-muted">
+              <div className="text-center py-5 text-muted small">
                 No records found matching the criteria.
               </div>
             ) : (
-              <div className="table-responsive">
-                <table className="table table-hover align-middle mb-0">
-                  <thead className="table-light">
-                    <tr>
-                      <th style={{ width: '130px' }} className="px-4 py-3">{t('uniqueId')}</th>
-                      <th style={{ width: '180px' }}>{t('name')}</th>
-                      <th style={{ width: '160px' }}>{t('fatherOrSpouseName')}</th>
-                      <th style={{ width: '110px' }}>{t('mobileNumber')}</th>
-                      <th style={{ width: '115px' }}>{t('dikshaDate')}</th>
-                      <th style={{ width: '140px' }}>{t('dikshaGuru')}</th>
-                      <th>{t('address')}</th>
-                      <th style={{ width: '130px' }} className="text-end px-4 py-3">{t('actions')}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {persons.map((p) => (
-                      <tr key={p.id}>
-                        <td className="px-4 py-3">
-                          <span className="badge bg-primary bg-opacity-15 text-primary border border-primary border-opacity-25 font-mono px-2 py-1 fs-6 fw-bold">
-                            {p.unique_id}
+              <table className="saas-table align-middle">
+                <thead>
+                  <tr>
+                    <th style={{ width: '130px' }}>{t('uniqueId')}</th>
+                    <th style={{ width: '200px' }}>{t('name')}</th>
+                    <th style={{ width: '170px' }}>{t('fatherOrSpouseName')}</th>
+                    <th style={{ width: '130px' }}>{t('mobileNumber')}</th>
+                    <th style={{ width: '115px' }}>{t('dikshaDate')}</th>
+                    <th style={{ width: '150px' }}>{t('dikshaGuru')}</th>
+                    <th>{t('address')}</th>
+                    <th style={{ width: '110px' }} className="text-end">{t('actions')}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {persons.map((p) => (
+                    <tr key={p.id}>
+                      <td>
+                        <span className="badge-unique-id">
+                          {p.unique_id}
+                        </span>
+                      </td>
+                      <td>
+                        <div className="fw-bold text-dark">{p.name}</div>
+                      </td>
+                      <td>
+                        <span className="text-secondary small">{p.father_or_spouse_name || '—'}</span>
+                      </td>
+                      <td>
+                        {p.mobile_number ? (
+                          <span className="chip-tag chip-green font-mono">
+                            <Phone size={11} />
+                            <span>{p.mobile_number}</span>
                           </span>
-                        </td>
-                        <td className="fw-bold text-dark">{p.name}</td>
-                        <td className="small text-secondary">{p.father_or_spouse_name || '—'}</td>
-                        <td className="small font-mono">{p.mobile_number || '—'}</td>
-                        <td className="small">{p.diksha_date || '—'}</td>
-                        <td className="small">{p.diksha_guru || '—'}</td>
-                        <td className="whitespace-pre-line small text-secondary" style={{ maxWidth: '200px' }}>{p.address}</td>
-                        <td className="text-end px-4 py-3">
-                          <div className="btn-group btn-group-sm" role="group">
-                            <button
-                              type="button"
-                              className="btn btn-outline-secondary"
-                              onClick={() => setSelectedForDetail(p)}
-                              title={t('viewDetails')}
-                            >
-                              <Eye className="w-4 h-4" />
-                            </button>
-                            <button
-                              type="button"
-                              className="btn btn-outline-primary"
-                              onClick={() => handleOpenEdit(p)}
-                              title={t('editPerson')}
-                            >
-                              <Edit2 className="w-4 h-4" />
-                            </button>
-                            <button
-                              type="button"
-                              className="btn btn-outline-danger"
-                              onClick={() => setSelectedForDelete(p)}
-                              title={t('deletePerson')}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                        ) : (
+                          <span className="text-muted small">—</span>
+                        )}
+                      </td>
+                      <td>
+                        {p.diksha_date ? (
+                          <span className="chip-tag chip-orange">
+                            <Calendar size={11} />
+                            <span>{p.diksha_date}</span>
+                          </span>
+                        ) : (
+                          <span className="text-muted small">—</span>
+                        )}
+                      </td>
+                      <td>
+                        {p.diksha_guru ? (
+                          <span className="chip-tag chip-maroon">
+                            <Award size={11} />
+                            <span>{p.diksha_guru}</span>
+                          </span>
+                        ) : (
+                          <span className="text-muted small">—</span>
+                        )}
+                      </td>
+                      <td>
+                        <div className="whitespace-pre-line small text-secondary text-truncate-2" style={{ maxWidth: '240px' }}>
+                          {p.address}
+                        </div>
+                      </td>
+                      <td className="text-end">
+                        <div className="d-inline-flex align-items-center gap-1">
+                          <button
+                            type="button"
+                            className="btn-icon-ghost primary"
+                            onClick={() => setSelectedForDetail(p)}
+                            title={t('viewDetails')}
+                          >
+                            <Eye size={16} />
+                          </button>
+                          <button
+                            type="button"
+                            className="btn-icon-ghost warning"
+                            onClick={() => handleOpenEdit(p)}
+                            title={t('editPerson')}
+                          >
+                            <Edit3 size={16} />
+                          </button>
+                          <button
+                            type="button"
+                            className="btn-icon-ghost danger"
+                            onClick={() => setSelectedForDelete(p)}
+                            title={t('deletePerson')}
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             )}
           </div>
 
           {/* Pagination Footer */}
           {totalPages > 1 && (
-            <div className="card-footer bg-white p-3 border-0 d-flex align-items-center justify-content-between">
+            <div className="p-3 px-4 bg-white border-top d-flex align-items-center justify-content-between">
               <span className="small text-muted">
                 Page {page} of {totalPages} ({total} total records)
               </span>
 
-              <div className="btn-group btn-group-sm">
+              <div className="d-flex align-items-center gap-1">
                 <button
                   type="button"
-                  className="btn btn-outline-secondary"
+                  className="btn btn-sm btn-light border px-2.5 rounded-2"
                   disabled={page <= 1}
                   onClick={() => setPage((p) => Math.max(p - 1, 1))}
                 >
-                  <ChevronLeft className="w-4 h-4" />
+                  <ChevronLeft size={16} />
                 </button>
                 <button
                   type="button"
-                  className="btn btn-outline-secondary"
+                  className="btn btn-sm btn-light border px-2.5 rounded-2"
                   disabled={page >= totalPages}
                   onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
                 >
-                  <ChevronRight className="w-4 h-4" />
+                  <ChevronRight size={16} />
                 </button>
               </div>
             </div>
