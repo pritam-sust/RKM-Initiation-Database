@@ -7,8 +7,30 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const query = searchParams.get('q')?.trim() || '';
     const page = Math.max(parseInt(searchParams.get('page') || '1', 10), 1);
-    const limit = Math.max(parseInt(searchParams.get('limit') || '20', 10), 1);
+    const limit = Math.min(Math.max(parseInt(searchParams.get('limit') || '24', 10), 1), 200);
     const skip = (page - 1) * limit;
+
+    // Sorting
+    const sortByParam = searchParams.get('sortBy')?.trim();
+    const sortOrderParam = searchParams.get('sortOrder')?.toLowerCase() === 'desc' ? 'desc' : 'asc';
+
+    // Map allowed sort fields to Prisma Person schema fields
+    const sortFieldMap: Record<string, keyof Prisma.PersonOrderByWithRelationInput> = {
+      name: 'name',
+      diksha_guru: 'diksha_guru',
+      diksha_date: 'diksha_date',
+      unique_id: 'unique_id',
+      created_at: 'created_at',
+      updated_at: 'updated_at',
+      father_or_spouse_name: 'father_or_spouse_name',
+      age: 'age',
+      mobile_number: 'mobile_number',
+    };
+
+    const sortField = sortByParam && sortFieldMap[sortByParam] ? sortFieldMap[sortByParam] : 'name';
+    const orderBy: Prisma.PersonOrderByWithRelationInput = {
+      [sortField]: sortOrderParam,
+    };
 
     // Field-specific filters
     const unique_id = searchParams.get('unique_id')?.trim();
@@ -84,7 +106,7 @@ export async function GET(request: NextRequest) {
     const [persons, total] = await Promise.all([
       prisma.person.findMany({
         where: whereClause,
-        orderBy: { updated_at: 'desc' },
+        orderBy,
         skip,
         take: limit,
       }),
@@ -97,6 +119,8 @@ export async function GET(request: NextRequest) {
       page,
       totalPages: Math.ceil(total / limit) || 1,
       limit,
+      sortBy: sortField,
+      sortOrder: sortOrderParam,
     });
   } catch (error) {
     console.error('Search API error:', error);

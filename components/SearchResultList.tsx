@@ -2,27 +2,52 @@
 
 import React from 'react';
 import { PersonRecord } from '@/types';
-import { AlertCircle, Calendar, ArrowRight, MapPin, Phone, Award, User, SearchX, RotateCcw } from 'lucide-react';
+import { AlertCircle, Calendar, ArrowRight, MapPin, Phone, Award, User, SearchX, RotateCcw, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { useLanguage } from './LanguageProvider';
+import Pagination from './Pagination';
 
 interface SearchResultListProps {
   results: PersonRecord[];
   total: number;
+  page: number;
+  totalPages: number;
+  limit: number;
+  sortBy: string;
+  sortOrder: 'asc' | 'desc';
   isLoading: boolean;
   error?: string | null;
   onSelectPerson: (person: PersonRecord) => void;
   onClearFilters?: () => void;
+  onPageChange: (newPage: number) => void;
+  onLimitChange: (newLimit: number) => void;
+  onSortChange: (newSortBy: string, newSortOrder: 'asc' | 'desc') => void;
 }
 
 export default function SearchResultList({
   results,
   total,
+  page,
+  totalPages,
+  limit,
+  sortBy,
+  sortOrder,
   isLoading,
   error,
   onSelectPerson,
   onClearFilters,
+  onPageChange,
+  onLimitChange,
+  onSortChange,
 }: SearchResultListProps) {
   const { t, language } = useLanguage();
+
+  const handleSortFieldChange = (field: string) => {
+    onSortChange(field, sortOrder);
+  };
+
+  const handleToggleSortOrder = () => {
+    onSortChange(sortBy, sortOrder === 'asc' ? 'desc' : 'asc');
+  };
 
   if (isLoading) {
     return (
@@ -117,18 +142,58 @@ export default function SearchResultList({
 
   return (
     <div>
-      {/* Modern Results Status Bar */}
+      {/* Modern Results Status Bar with Top Sorting Controls */}
       <div className="results-status-bar">
+        {/* Left: Total Records Count */}
         <div className="results-count-pill">
-          <span className="results-count-number">{total}</span>
+          <span className="results-count-number">{total.toLocaleString()}</span>
           <span className="results-count-text">{t('resultsFound')}</span>
         </div>
 
-        <div className="d-flex align-items-center gap-2">
-          <span className="live-status-dot"></span>
-          <span className="extra-small fw-semibold text-secondary d-none d-sm-inline" style={{ fontSize: '0.75rem' }}>
-            Live Directory
-          </span>
+        {/* Right: Interactive Sorting & Live Indicator */}
+        <div className="d-flex flex-wrap align-items-center gap-2.5 ms-auto">
+          {/* Sorting Controls */}
+          <div className="sort-controls-group">
+            <span className="extra-small text-muted d-none d-md-inline" style={{ fontSize: '0.75rem' }}>
+              {t('sortBy')}:
+            </span>
+            <select
+              className="sort-select-custom"
+              value={sortBy}
+              onChange={(e) => handleSortFieldChange(e.target.value)}
+              title={t('sortBy')}
+            >
+              <option value="name">{t('sortByName')}</option>
+              <option value="diksha_guru">{t('sortByGuru')}</option>
+              <option value="diksha_date">{t('sortByDate')}</option>
+              <option value="unique_id">{t('sortById')}</option>
+              <option value="created_at">{t('sortByRecent')}</option>
+            </select>
+
+            {/* Sort Order Direction Toggle */}
+            <button
+              type="button"
+              className="btn-sort-toggle active"
+              onClick={handleToggleSortOrder}
+              title={`${t('sortOrder')}: ${sortOrder === 'asc' ? t('ascending') : t('descending')}`}
+            >
+              {sortOrder === 'asc' ? (
+                <ArrowUp size={14} className="text-primary" />
+              ) : (
+                <ArrowDown size={14} className="text-primary" />
+              )}
+              <span className="ms-1 font-mono extra-small" style={{ fontSize: '0.75rem' }}>
+                {sortOrder.toUpperCase()}
+              </span>
+            </button>
+          </div>
+
+          <div className="d-flex align-items-center gap-1.5 ps-2 border-start border-slate-200">
+            <span className="live-status-dot"></span>
+            <span className="extra-small fw-semibold text-secondary d-none d-lg-inline" style={{ fontSize: '0.75rem' }}>
+              Live Directory
+            </span>
+          </div>
         </div>
       </div>
 
@@ -230,6 +295,17 @@ export default function SearchResultList({
           </div>
         ))}
       </div>
+
+      {/* Modern Pagination Controls */}
+      <Pagination
+        currentPage={page}
+        totalPages={totalPages}
+        totalRecords={total}
+        limit={limit}
+        onPageChange={onPageChange}
+        onLimitChange={onLimitChange}
+        limitOptions={[12, 24, 48, 96]}
+      />
     </div>
   );
 }

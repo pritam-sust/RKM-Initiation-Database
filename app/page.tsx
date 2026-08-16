@@ -12,49 +12,90 @@ export default function PublicSearchPage() {
   const [filters, setFilters] = useState<PersonFilterOptions>({ q: '' });
   const [results, setResults] = useState<PersonRecord[]>([]);
   const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [limit, setLimit] = useState(24);
+  const [sortBy, setSortBy] = useState('name');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedPerson, setSelectedPerson] = useState<PersonRecord | null>(null);
 
-  const fetchResults = useCallback(async (currentFilters: PersonFilterOptions) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const params = new URLSearchParams();
-      if (currentFilters.q?.trim()) params.set('q', currentFilters.q.trim());
-      if (currentFilters.unique_id?.trim()) params.set('unique_id', currentFilters.unique_id.trim());
-      if (currentFilters.name?.trim()) params.set('name', currentFilters.name.trim());
-      if (currentFilters.father_or_spouse_name?.trim()) params.set('father_or_spouse_name', currentFilters.father_or_spouse_name.trim());
-      if (currentFilters.age?.trim()) params.set('age', currentFilters.age.trim());
-      if (currentFilters.address?.trim()) params.set('address', currentFilters.address.trim());
-      if (currentFilters.mobile_number?.trim()) params.set('mobile_number', currentFilters.mobile_number.trim());
-      if (currentFilters.occupation?.trim()) params.set('occupation', currentFilters.occupation.trim());
-      if (currentFilters.education?.trim()) params.set('education', currentFilters.education.trim());
-      if (currentFilters.diksha_date?.trim()) params.set('diksha_date', currentFilters.diksha_date.trim());
-      if (currentFilters.diksha_guru?.trim()) params.set('diksha_guru', currentFilters.diksha_guru.trim());
-      params.set('limit', '50');
+  const fetchResults = useCallback(
+    async (
+      currentFilters: PersonFilterOptions,
+      currentPage: number,
+      currentLimit: number,
+      currentSortBy: string,
+      currentSortOrder: 'asc' | 'desc'
+    ) => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const params = new URLSearchParams();
+        if (currentFilters.q?.trim()) params.set('q', currentFilters.q.trim());
+        if (currentFilters.unique_id?.trim()) params.set('unique_id', currentFilters.unique_id.trim());
+        if (currentFilters.name?.trim()) params.set('name', currentFilters.name.trim());
+        if (currentFilters.father_or_spouse_name?.trim()) params.set('father_or_spouse_name', currentFilters.father_or_spouse_name.trim());
+        if (currentFilters.age?.trim()) params.set('age', currentFilters.age.trim());
+        if (currentFilters.address?.trim()) params.set('address', currentFilters.address.trim());
+        if (currentFilters.mobile_number?.trim()) params.set('mobile_number', currentFilters.mobile_number.trim());
+        if (currentFilters.occupation?.trim()) params.set('occupation', currentFilters.occupation.trim());
+        if (currentFilters.education?.trim()) params.set('education', currentFilters.education.trim());
+        if (currentFilters.diksha_date?.trim()) params.set('diksha_date', currentFilters.diksha_date.trim());
+        if (currentFilters.diksha_guru?.trim()) params.set('diksha_guru', currentFilters.diksha_guru.trim());
+        
+        params.set('page', String(currentPage));
+        params.set('limit', String(currentLimit));
+        params.set('sortBy', currentSortBy);
+        params.set('sortOrder', currentSortOrder);
 
-      const res = await fetch(`/api/search?${params.toString()}`);
-      const data = await res.json();
-      if (res.ok) {
-        setResults(data.data || []);
-        setTotal(data.total || 0);
-      } else {
-        setError(data.error || 'Failed to perform search.');
+        const res = await fetch(`/api/search?${params.toString()}`);
+        const data = await res.json();
+        if (res.ok) {
+          setResults(data.data || []);
+          setTotal(data.total || 0);
+          setTotalPages(data.totalPages || 1);
+        } else {
+          setError(data.error || 'Failed to perform search.');
+        }
+      } catch {
+        setError('Network error. Please try again.');
+      } finally {
+        setIsLoading(false);
       }
-    } catch {
-      setError('Network error. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+    },
+    []
+  );
 
   useEffect(() => {
-    fetchResults(filters);
-  }, [filters, fetchResults]);
+    fetchResults(filters, page, limit, sortBy, sortOrder);
+  }, [filters, page, limit, sortBy, sortOrder, fetchResults]);
+
+  const handleFilterChange = (newFilters: PersonFilterOptions) => {
+    setFilters(newFilters);
+    setPage(1);
+  };
 
   const handleClearAllFilters = () => {
     setFilters({ q: '' });
+    setPage(1);
+  };
+
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+    window.scrollTo({ top: 320, behavior: 'smooth' });
+  };
+
+  const handleLimitChange = (newLimit: number) => {
+    setLimit(newLimit);
+    setPage(1);
+  };
+
+  const handleSortChange = (newSortBy: string, newSortOrder: 'asc' | 'desc') => {
+    setSortBy(newSortBy);
+    setSortOrder(newSortOrder);
+    setPage(1);
   };
 
   return (
@@ -70,7 +111,7 @@ export default function PublicSearchPage() {
             {t('appTitle')}
           </h1>
           <p className="lead text-muted fs-6 mb-0">
-            Search and verify initiation records across all person details with instant partial matching.
+            Search and verify initiation records across all devotee details with instant partial matching.
           </p>
         </div>
       </div>
@@ -81,22 +122,30 @@ export default function PublicSearchPage() {
           <div className="max-w-3xl mx-auto">
             <SearchForm
               initialFilters={filters}
-              onSearch={(newFilters) => setFilters(newFilters)}
+              onSearch={handleFilterChange}
               isLoading={isLoading}
             />
           </div>
         </div>
       </div>
 
-      {/* 3-Column Results Grid */}
+      {/* 3-Column Results Grid with Sorting & Pagination */}
       <div className="container pb-5">
         <SearchResultList
           results={results}
           total={total}
+          page={page}
+          totalPages={totalPages}
+          limit={limit}
+          sortBy={sortBy}
+          sortOrder={sortOrder}
           isLoading={isLoading}
           error={error}
           onSelectPerson={setSelectedPerson}
           onClearFilters={handleClearAllFilters}
+          onPageChange={handlePageChange}
+          onLimitChange={handleLimitChange}
+          onSortChange={handleSortChange}
         />
       </div>
 

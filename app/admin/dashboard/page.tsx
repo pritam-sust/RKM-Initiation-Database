@@ -2,25 +2,56 @@
 
 import AdminNavbar from '@/components/admin/AdminNavbar';
 import DeleteConfirmModal from '@/components/admin/DeleteConfirmModal';
+import BulkDeleteConfirmModal from '@/components/admin/BulkDeleteConfirmModal';
 import PersonFormModal from '@/components/admin/PersonFormModal';
 import { useLanguage } from '@/components/LanguageProvider';
 import PersonDetailModal from '@/components/PersonDetailModal';
+import Pagination from '@/components/Pagination';
 import { PersonRecord, PersonFilterOptions } from '@/types';
-import { ChevronLeft, ChevronRight, Edit3, Eye, Plus, Search, Trash2, Users, SlidersHorizontal, RotateCcw, ChevronDown, ChevronUp, Calendar, Award, Phone } from 'lucide-react';
+import {
+  Edit3,
+  Eye,
+  Plus,
+  Search,
+  Trash2,
+  Users,
+  SlidersHorizontal,
+  RotateCcw,
+  ChevronDown,
+  ChevronUp,
+  Calendar,
+  Award,
+  Phone,
+  ArrowUp,
+  ArrowDown,
+  ArrowUpDown,
+  CheckSquare,
+  Square,
+  MinusSquare,
+  X,
+  Clock,
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 
 export default function AdminDashboardPage() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const router = useRouter();
 
   const [persons, setPersons] = useState<PersonRecord[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [limit, setLimit] = useState(15);
+  const [sortBy, setSortBy] = useState('created_at');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [filters, setFilters] = useState<PersonFilterOptions>({ q: '' });
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Bulk Selection state
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
 
   // Modals state
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -49,8 +80,11 @@ export default function AdminDashboardPage() {
       if (filters.education?.trim()) params.set('education', filters.education.trim());
       if (filters.diksha_date?.trim()) params.set('diksha_date', filters.diksha_date.trim());
       if (filters.diksha_guru?.trim()) params.set('diksha_guru', filters.diksha_guru.trim());
+
       params.set('page', String(page));
-      params.set('limit', '10');
+      params.set('limit', String(limit));
+      params.set('sortBy', sortBy);
+      params.set('sortOrder', sortOrder);
 
       const res = await fetch(`/api/admin/persons?${params.toString()}`);
       const data = await res.json();
@@ -64,7 +98,7 @@ export default function AdminDashboardPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [filters, page, router]);
+  }, [filters, page, limit, sortBy, sortOrder, router]);
 
   useEffect(() => {
     checkAuthAndFetch();
@@ -90,11 +124,13 @@ export default function AdminDashboardPage() {
   const handleGlobalQueryChange = (val: string) => {
     setFilters((prev) => ({ ...prev, q: val }));
     setPage(1);
+    setSelectedIds(new Set());
   };
 
   const handleFieldChange = (key: keyof PersonFilterOptions, val: string) => {
     setFilters((prev) => ({ ...prev, [key]: val }));
     setPage(1);
+    setSelectedIds(new Set());
   };
 
   const handleClearFilters = () => {
@@ -112,6 +148,70 @@ export default function AdminDashboardPage() {
       diksha_guru: '',
     });
     setPage(1);
+    setSelectedIds(new Set());
+  };
+
+  const handleSortColumn = (columnField: string) => {
+    if (sortBy === columnField) {
+      setSortOrder((prev) => (prev === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortBy(columnField);
+      // For dates and timestamps, default to descending (newest first)
+      if (columnField === 'created_at' || columnField === 'diksha_date') {
+        setSortOrder('desc');
+      } else {
+        setSortOrder('asc');
+      }
+    }
+    setPage(1);
+  };
+
+  const renderSortIndicator = (columnField: string) => {
+    if (sortBy === columnField) {
+      return sortOrder === 'asc' ? (
+        <ArrowUp size={14} className="text-primary th-sort-arrow" />
+      ) : (
+        <ArrowDown size={14} className="text-primary th-sort-arrow" />
+      );
+    }
+    return <ArrowUpDown size={13} className="th-sort-arrow opacity-40" />;
+  };
+
+  // Row Selection logic
+  const toggleSelectRow = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const isAllOnPageSelected =
+    persons.length > 0 && persons.every((p) => selectedIds.has(p.id));
+  const isSomeOnPageSelected =
+    persons.some((p) => selectedIds.has(p.id)) && !isAllOnPageSelected;
+
+  const toggleSelectAllOnPage = () => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (isAllOnPageSelected) {
+        persons.forEach((p) => next.delete(p.id));
+      } else {
+        persons.forEach((p) => next.add(p.id));
+      }
+      return next;
+    });
+  };
+
+  const selectedPersonsList = persons.filter((p) => selectedIds.has(p.id));
+
+  const handleBulkDeleteSuccess = () => {
+    setSelectedIds(new Set());
+    checkAuthAndFetch();
   };
 
   const handleOpenAdd = () => {
@@ -135,7 +235,9 @@ export default function AdminDashboardPage() {
             <div className="stat-card-modern h-100">
               <div>
                 <span className="form-label-custom mb-1">{t('totalRecords')}</span>
-                <h2 className="display-6 fw-bold text-dark mb-0 tracking-tight">{total}</h2>
+                <h2 className="display-6 fw-bold text-dark mb-0 tracking-tight font-mono">
+                  {total.toLocaleString()}
+                </h2>
               </div>
               <div className="stat-icon-wrapper stat-icon-blue">
                 <Users size={24} />
@@ -327,18 +429,84 @@ export default function AdminDashboardPage() {
           </div>
         )}
 
+        {/* Floating / Sticky Bulk Action Bar */}
+        {selectedIds.size > 0 && (
+          <div
+            className="p-3 px-4 mb-3 bg-dark text-white rounded-3 shadow-lg d-flex flex-wrap align-items-center justify-content-between gap-3 animate-fade-in"
+            style={{ borderLeft: '4px solid #ef4444' }}
+          >
+            <div className="d-flex align-items-center gap-3">
+              <span className="badge rounded-pill bg-danger px-3 py-1.5 fw-bold font-mono fs-6">
+                {selectedIds.size}
+              </span>
+              <span className="fw-semibold">
+                {language === 'bn'
+                  ? `${selectedIds.size} টি রেকর্ড নির্বাচন করা হয়েছে`
+                  : `${selectedIds.size} records selected`}
+              </span>
+            </div>
+
+            <div className="d-flex align-items-center gap-2">
+              <button
+                type="button"
+                className="btn btn-sm btn-outline-light d-flex align-items-center gap-1 px-3 py-1.5"
+                onClick={() => setSelectedIds(new Set())}
+              >
+                <X size={14} />
+                <span>{t('clearSelection')}</span>
+              </button>
+
+              <button
+                type="button"
+                className="btn btn-sm btn-danger d-flex align-items-center gap-1.5 px-3.5 py-1.5 fw-bold shadow-sm"
+                onClick={() => setIsBulkDeleteModalOpen(true)}
+              >
+                <Trash2 size={15} />
+                <span>
+                  {language === 'bn'
+                    ? `নির্বাচিত ${selectedIds.size} টি মুছুন`
+                    : `Delete Selected (${selectedIds.size})`}
+                </span>
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Records Table Card */}
         <div className="saas-table-container">
-          <div className="p-3.5 px-4 bg-white border-bottom d-flex align-items-center justify-content-between">
-            <h5 className="fw-bold text-dark mb-0 fs-6">{t('adminDashboard')}</h5>
-            <button
-              type="button"
-              className="btn-rkm-primary btn-sm px-3.5"
-              onClick={handleOpenAdd}
-            >
-              <Plus size={16} />
-              <span>{t('addNewPerson')}</span>
-            </button>
+          <div className="p-3.5 px-4 bg-white border-bottom d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div className="d-flex align-items-center gap-3">
+              <h5 className="fw-bold text-dark mb-0 fs-6">{t('adminDashboard')}</h5>
+              <span className="badge-unique-id" style={{ fontSize: '0.75rem' }}>
+                {total.toLocaleString()} {t('records')}
+              </span>
+            </div>
+
+            <div className="d-flex align-items-center gap-2">
+              {selectedIds.size > 0 && (
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-danger d-flex align-items-center gap-1.5 px-3 py-1.5 fw-semibold"
+                  onClick={() => setIsBulkDeleteModalOpen(true)}
+                >
+                  <Trash2 size={14} />
+                  <span>
+                    {language === 'bn'
+                      ? `মুছুন (${selectedIds.size})`
+                      : `Delete (${selectedIds.size})`}
+                  </span>
+                </button>
+              )}
+
+              <button
+                type="button"
+                className="btn-rkm-primary btn-sm px-3.5"
+                onClick={handleOpenAdd}
+              >
+                <Plus size={16} />
+                <span>{t('addNewPerson')}</span>
+              </button>
+            </div>
           </div>
 
           <div className="table-responsive">
@@ -356,131 +524,282 @@ export default function AdminDashboardPage() {
               <table className="saas-table align-middle">
                 <thead>
                   <tr>
-                    <th style={{ width: '130px' }}>{t('uniqueId')}</th>
-                    <th style={{ width: '200px' }}>{t('name')}</th>
-                    <th style={{ width: '170px' }}>{t('fatherOrSpouseName')}</th>
-                    <th style={{ width: '130px' }}>{t('mobileNumber')}</th>
-                    <th style={{ width: '115px' }}>{t('dikshaDate')}</th>
-                    <th style={{ width: '150px' }}>{t('dikshaGuru')}</th>
-                    <th>{t('address')}</th>
+                    {/* Master Checkbox Column */}
+                    <th style={{ width: '45px' }} className="text-center">
+                      <button
+                        type="button"
+                        className="btn btn-link p-0 text-dark border-0 d-inline-flex align-items-center justify-content-center"
+                        onClick={toggleSelectAllOnPage}
+                        title={isAllOnPageSelected ? t('deselectAll') : t('selectAll')}
+                      >
+                        {isAllOnPageSelected ? (
+                          <CheckSquare size={18} className="text-primary" />
+                        ) : isSomeOnPageSelected ? (
+                          <MinusSquare size={18} className="text-primary" />
+                        ) : (
+                          <Square size={18} className="text-muted" />
+                        )}
+                      </button>
+                    </th>
+
+                    {/* Sortable Unique ID */}
+                    <th
+                      style={{ width: '130px' }}
+                      className={`th-sortable ${sortBy === 'unique_id' ? 'active text-primary' : ''}`}
+                      onClick={() => handleSortColumn('unique_id')}
+                      title={`Click to sort by ${t('uniqueId')}`}
+                    >
+                      <div className="d-flex align-items-center justify-content-between">
+                        <span>{t('uniqueId')}</span>
+                        {renderSortIndicator('unique_id')}
+                      </div>
+                    </th>
+
+                    {/* Sortable Name */}
+                    <th
+                      style={{ width: '180px' }}
+                      className={`th-sortable ${sortBy === 'name' ? 'active text-primary' : ''}`}
+                      onClick={() => handleSortColumn('name')}
+                      title={`Click to sort by ${t('name')}`}
+                    >
+                      <div className="d-flex align-items-center justify-content-between">
+                        <span>{t('name')}</span>
+                        {renderSortIndicator('name')}
+                      </div>
+                    </th>
+
+                    {/* Sortable Father / Spouse */}
+                    <th
+                      style={{ width: '160px' }}
+                      className={`th-sortable ${sortBy === 'father_or_spouse_name' ? 'active text-primary' : ''}`}
+                      onClick={() => handleSortColumn('father_or_spouse_name')}
+                      title={`Click to sort by ${t('fatherOrSpouseName')}`}
+                    >
+                      <div className="d-flex align-items-center justify-content-between">
+                        <span>{t('fatherOrSpouseName')}</span>
+                        {renderSortIndicator('father_or_spouse_name')}
+                      </div>
+                    </th>
+
+                    {/* Sortable Mobile */}
+                    <th
+                      style={{ width: '125px' }}
+                      className={`th-sortable ${sortBy === 'mobile_number' ? 'active text-primary' : ''}`}
+                      onClick={() => handleSortColumn('mobile_number')}
+                      title={`Click to sort by ${t('mobileNumber')}`}
+                    >
+                      <div className="d-flex align-items-center justify-content-between">
+                        <span>{t('mobileNumber')}</span>
+                        {renderSortIndicator('mobile_number')}
+                      </div>
+                    </th>
+
+                    {/* Sortable Diksha Date */}
+                    <th
+                      style={{ width: '120px' }}
+                      className={`th-sortable ${sortBy === 'diksha_date' ? 'active text-primary' : ''}`}
+                      onClick={() => handleSortColumn('diksha_date')}
+                      title={`Click to sort by ${t('dikshaDate')}`}
+                    >
+                      <div className="d-flex align-items-center justify-content-between">
+                        <span>{t('dikshaDate')}</span>
+                        {renderSortIndicator('diksha_date')}
+                      </div>
+                    </th>
+
+                    {/* Sortable Diksha Guru */}
+                    <th
+                      style={{ width: '145px' }}
+                      className={`th-sortable ${sortBy === 'diksha_guru' ? 'active text-primary' : ''}`}
+                      onClick={() => handleSortColumn('diksha_guru')}
+                      title={`Click to sort by ${t('dikshaGuru')}`}
+                    >
+                      <div className="d-flex align-items-center justify-content-between">
+                        <span>{t('dikshaGuru')}</span>
+                        {renderSortIndicator('diksha_guru')}
+                      </div>
+                    </th>
+
+                    {/* Sortable Entry Date */}
+                    <th
+                      style={{ width: '130px' }}
+                      className={`th-sortable ${sortBy === 'created_at' ? 'active text-primary' : ''}`}
+                      onClick={() => handleSortColumn('created_at')}
+                      title={`Click to sort by ${t('entryDate')}`}
+                    >
+                      <div className="d-flex align-items-center justify-content-between">
+                        <span>{t('entryDate')}</span>
+                        {renderSortIndicator('created_at')}
+                      </div>
+                    </th>
+
+                    {/* Sortable Address */}
+                    <th
+                      className={`th-sortable ${sortBy === 'address' ? 'active text-primary' : ''}`}
+                      onClick={() => handleSortColumn('address')}
+                      title={`Click to sort by ${t('address')}`}
+                    >
+                      <div className="d-flex align-items-center justify-content-between">
+                        <span>{t('address')}</span>
+                        {renderSortIndicator('address')}
+                      </div>
+                    </th>
+
                     <th style={{ width: '110px' }} className="text-end">{t('actions')}</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {persons.map((p) => (
-                    <tr key={p.id}>
-                      <td>
-                        <span className="badge-unique-id">
-                          {p.unique_id}
-                        </span>
-                      </td>
-                      <td>
-                        <div className="fw-bold text-dark">{p.name}</div>
-                      </td>
-                      <td>
-                        <span className="text-secondary small">{p.father_or_spouse_name || '—'}</span>
-                      </td>
-                      <td>
-                        {p.mobile_number ? (
-                          <span className="chip-tag chip-green font-mono">
-                            <Phone size={11} />
-                            <span>{p.mobile_number}</span>
-                          </span>
-                        ) : (
-                          <span className="text-muted small">—</span>
-                        )}
-                      </td>
-                      <td>
-                        {p.diksha_date ? (
-                          <span className="chip-tag chip-orange">
-                            <Calendar size={11} />
-                            <span>{p.diksha_date}</span>
-                          </span>
-                        ) : (
-                          <span className="text-muted small">—</span>
-                        )}
-                      </td>
-                      <td>
-                        {p.diksha_guru ? (
-                          <span className="chip-tag chip-maroon">
-                            <Award size={11} />
-                            <span>{p.diksha_guru}</span>
-                          </span>
-                        ) : (
-                          <span className="text-muted small">—</span>
-                        )}
-                      </td>
-                      <td>
-                        <div className="whitespace-pre-line small text-secondary text-truncate-2" style={{ maxWidth: '240px' }}>
-                          {p.address}
-                        </div>
-                      </td>
-                      <td className="text-end">
-                        <div className="d-inline-flex align-items-center gap-1">
+                  {persons.map((p) => {
+                    const isSelected = selectedIds.has(p.id);
+                    const formattedEntryDate = p.created_at
+                      ? new Date(p.created_at).toLocaleDateString(language === 'bn' ? 'bn-BD' : 'en-GB', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric',
+                        })
+                      : '—';
+
+                    return (
+                      <tr key={p.id} className={isSelected ? 'table-active' : ''}>
+                        {/* Row Checkbox */}
+                        <td className="text-center">
                           <button
                             type="button"
-                            className="btn-icon-ghost primary"
-                            onClick={() => setSelectedForDetail(p)}
-                            title={t('viewDetails')}
+                            className="btn btn-link p-0 text-dark border-0 d-inline-flex align-items-center justify-content-center"
+                            onClick={() => toggleSelectRow(p.id)}
                           >
-                            <Eye size={16} />
+                            {isSelected ? (
+                              <CheckSquare size={18} className="text-primary" />
+                            ) : (
+                              <Square size={18} className="text-muted" />
+                            )}
                           </button>
-                          <button
-                            type="button"
-                            className="btn-icon-ghost warning"
-                            onClick={() => handleOpenEdit(p)}
-                            title={t('editPerson')}
-                          >
-                            <Edit3 size={16} />
-                          </button>
-                          <button
-                            type="button"
-                            className="btn-icon-ghost danger"
-                            onClick={() => setSelectedForDelete(p)}
-                            title={t('deletePerson')}
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+
+                        <td>
+                          <span className="badge-unique-id">
+                            {p.unique_id}
+                          </span>
+                        </td>
+                        <td>
+                          <div className="fw-bold text-dark">{p.name}</div>
+                        </td>
+                        <td>
+                          <span className="text-secondary small">{p.father_or_spouse_name || '—'}</span>
+                        </td>
+                        <td>
+                          {p.mobile_number ? (
+                            <span className="chip-tag chip-green font-mono">
+                              <Phone size={11} />
+                              <span>{p.mobile_number}</span>
+                            </span>
+                          ) : (
+                            <span className="text-muted small">—</span>
+                          )}
+                        </td>
+                        <td>
+                          {p.diksha_date ? (
+                            <span className="chip-tag chip-orange">
+                              <Calendar size={11} />
+                              <span>{p.diksha_date}</span>
+                            </span>
+                          ) : (
+                            <span className="text-muted small">—</span>
+                          )}
+                        </td>
+                        <td>
+                          {p.diksha_guru ? (
+                            <span className="chip-tag chip-maroon">
+                              <Award size={11} />
+                              <span>{p.diksha_guru}</span>
+                            </span>
+                          ) : (
+                            <span className="text-muted small">—</span>
+                          )}
+                        </td>
+                        {/* Entry Date */}
+                        <td>
+                          <div className="d-flex align-items-center gap-1.5 text-secondary small font-mono" title={p.created_at ? new Date(p.created_at).toLocaleString() : ''}>
+                            <Clock size={12} className="text-muted flex-shrink-0" />
+                            <span>{formattedEntryDate}</span>
+                          </div>
+                        </td>
+                        <td>
+                          <div className="whitespace-pre-line small text-secondary text-truncate-2" style={{ maxWidth: '200px' }}>
+                            {p.address}
+                          </div>
+                        </td>
+                        <td className="text-end">
+                          <div className="d-inline-flex align-items-center gap-1">
+                            <button
+                              type="button"
+                              className="btn-icon-ghost primary"
+                              onClick={() => setSelectedForDetail(p)}
+                              title={t('viewDetails')}
+                            >
+                              <Eye size={16} />
+                            </button>
+                            <button
+                              type="button"
+                              className="btn-icon-ghost warning"
+                              onClick={() => handleOpenEdit(p)}
+                              title={t('editPerson')}
+                            >
+                              <Edit3 size={16} />
+                            </button>
+                            <button
+                              type="button"
+                              className="btn-icon-ghost danger"
+                              onClick={() => setSelectedForDelete(p)}
+                              title={t('deletePerson')}
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             )}
           </div>
 
-          {/* Pagination Footer */}
-          {totalPages > 1 && (
-            <div className="p-3 px-4 bg-white border-top d-flex align-items-center justify-content-between">
-              <span className="small text-muted">
-                Page {page} of {totalPages} ({total} total records)
-              </span>
-
-              <div className="d-flex align-items-center gap-1">
-                <button
-                  type="button"
-                  className="btn btn-sm btn-light border px-2.5 rounded-2"
-                  disabled={page <= 1}
-                  onClick={() => setPage((p) => Math.max(p - 1, 1))}
-                >
-                  <ChevronLeft size={16} />
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-sm btn-light border px-2.5 rounded-2"
-                  disabled={page >= totalPages}
-                  onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
-                >
-                  <ChevronRight size={16} />
-                </button>
-              </div>
-            </div>
-          )}
+          {/* Full Pagination Footer */}
+          <div className="p-3 bg-white border-top">
+            <Pagination
+              currentPage={page}
+              totalPages={totalPages}
+              totalRecords={total}
+              limit={limit}
+              onPageChange={(newPage) => setPage(newPage)}
+              onLimitChange={(newLimit) => {
+                setLimit(newLimit);
+                setPage(1);
+                setSelectedIds(new Set());
+              }}
+              limitOptions={[15, 30, 50, 100]}
+            />
+          </div>
         </div>
       </div>
 
-      {/* Modals */}
+      {/* Single Delete Modal */}
+      <DeleteConfirmModal
+        person={selectedForDelete}
+        onClose={() => setSelectedForDelete(null)}
+        onSuccess={checkAuthAndFetch}
+      />
+
+      {/* Bulk Delete Modal */}
+      <BulkDeleteConfirmModal
+        selectedPersons={selectedPersonsList}
+        isOpen={isBulkDeleteModalOpen}
+        onClose={() => setIsBulkDeleteModalOpen(false)}
+        onSuccess={handleBulkDeleteSuccess}
+      />
+
+      {/* Add / Edit Form Modal */}
       <PersonFormModal
         person={selectedForEdit}
         isOpen={isFormOpen}
@@ -488,12 +807,7 @@ export default function AdminDashboardPage() {
         onSuccess={checkAuthAndFetch}
       />
 
-      <DeleteConfirmModal
-        person={selectedForDelete}
-        onClose={() => setSelectedForDelete(null)}
-        onSuccess={checkAuthAndFetch}
-      />
-
+      {/* View Details Modal */}
       <PersonDetailModal
         person={selectedForDetail}
         onClose={() => setSelectedForDetail(null)}

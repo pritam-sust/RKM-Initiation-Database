@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { getAdminSession } from '@/lib/auth';
 import { personSchema } from '@/lib/validators';
+import { Prisma } from '@prisma/client';
 
 export async function GET(request: NextRequest) {
   const session = await getAdminSession();
@@ -13,8 +14,32 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const query = searchParams.get('q')?.trim() || '';
     const page = Math.max(parseInt(searchParams.get('page') || '1', 10), 1);
-    const limit = Math.max(parseInt(searchParams.get('limit') || '15', 10), 1);
+    const limit = Math.min(Math.max(parseInt(searchParams.get('limit') || '15', 10), 1), 200);
     const skip = (page - 1) * limit;
+
+    // Sorting
+    const sortByParam = searchParams.get('sortBy')?.trim();
+    const sortOrderParam = searchParams.get('sortOrder')?.toLowerCase() === 'asc' ? 'asc' : 'desc';
+
+    const sortFieldMap: Record<string, keyof Prisma.PersonOrderByWithRelationInput> = {
+      name: 'name',
+      diksha_guru: 'diksha_guru',
+      diksha_date: 'diksha_date',
+      unique_id: 'unique_id',
+      created_at: 'created_at',
+      updated_at: 'updated_at',
+      father_or_spouse_name: 'father_or_spouse_name',
+      age: 'age',
+      mobile_number: 'mobile_number',
+      address: 'address',
+      occupation: 'occupation',
+      education: 'education',
+    };
+
+    const sortField = sortByParam && sortFieldMap[sortByParam] ? sortFieldMap[sortByParam] : 'created_at';
+    const orderBy: Prisma.PersonOrderByWithRelationInput = {
+      [sortField]: sortOrderParam,
+    };
 
     // Field-specific filters
     const unique_id = searchParams.get('unique_id')?.trim();
@@ -28,8 +53,7 @@ export async function GET(request: NextRequest) {
     const diksha_date = searchParams.get('diksha_date')?.trim();
     const diksha_guru = searchParams.get('diksha_guru')?.trim();
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const conditions: any[] = [];
+    const conditions: Prisma.PersonWhereInput[] = [];
 
     if (query) {
       conditions.push({
@@ -59,18 +83,17 @@ export async function GET(request: NextRequest) {
     if (diksha_date) conditions.push({ diksha_date: { contains: diksha_date, mode: 'insensitive' } });
     if (diksha_guru) conditions.push({ diksha_guru: { contains: diksha_guru, mode: 'insensitive' } });
 
-    const whereClause =
+    const whereClause: Prisma.PersonWhereInput =
       conditions.length === 0
         ? {}
         : conditions.length === 1
         ? conditions[0]
         : { AND: conditions };
 
-
     const [persons, total] = await Promise.all([
       prisma.person.findMany({
         where: whereClause,
-        orderBy: { updated_at: 'desc' },
+        orderBy,
         skip,
         take: limit,
       }),
@@ -83,6 +106,8 @@ export async function GET(request: NextRequest) {
       page,
       totalPages: Math.ceil(total / limit) || 1,
       limit,
+      sortBy: sortField,
+      sortOrder: sortOrderParam,
     });
   } catch (error) {
     console.error('Admin GET Persons error:', error);
@@ -139,6 +164,45 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, data: newPerson }, { status: 201 });
   } catch (error) {
     console.error('Admin POST Person error:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
+
+/**
+ * Bulk DELETE multiple records by array of IDs
+ */
+export async function DELETE(request: NextRequest) {
+  const session = await getAdminSession();
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  try {
+    const body = await request.json();
+    const rawIds = Array.isArray(body?.ids) ? body.ids : [];
+    const ids = rawIds.filter((id: unknown): id is string => typeof id === 'string' && id.trim().length > 0);
+
+    if (ids.length === 0) {
+      return NextResponse.json(
+        { error: 'No record IDs provided for deletion.' },
+        { status: 400 }
+      );
+    }
+
+    const result = await prisma.person.deleteMany({
+      where: {
+        id: {
+          in: ids,
+        },
+      },
+    });
+
+    return NextResponse.json({
+      success: true,
+      deletedCount: result.count,
+    });
+  } catch (error) {
+    console.error('Admin Bulk DELETE Persons error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

@@ -126,7 +126,9 @@ function findHeaderRow(data: (string | number | Date | null | undefined)[][]): n
       rowStr.includes('নাম') ||
       rowStr.includes('name') ||
       rowStr.includes('address') ||
-      rowStr.includes('ঠিকানা')
+      rowStr.includes('ঠিকানা') ||
+      rowStr.includes('guru') ||
+      rowStr.includes('দীক্ষাগুরু')
     ) {
       return r;
     }
@@ -162,21 +164,44 @@ function mapHeadersToFields(headers: string[]): ColumnMapping {
   };
 
   headers.forEach((h, idx) => {
-    const header = h.trim();
+    const header = h.toLowerCase().replace(/[:;/\\_\-\.]/g, ' ').replace(/\s+/g, ' ').trim();
 
-    // Diksha Date (Check first to avoid false matching with 'দীক্ষা')
+    // 1. Diksha Date (Check early to distinguish from generic diksha)
     if (
       map.diksha_date === -1 &&
       (header.includes('diksha date') ||
+        header.includes('dikkha date') ||
         header.includes('initiation date') ||
+        header.includes('date of diksha') ||
         header.includes('দীক্ষার তারিখ') ||
         header.includes('দীক্ষা তারিখ') ||
-        header.includes('তারিখ') ||
-        header.includes('date'))
+        header.includes('দীক্ষার সন') ||
+        header.includes('দীক্ষা গ্রহণের তারিখ') ||
+        (header.includes('তারিখ') && !header.includes('জন্ম')) ||
+        header === 'date' ||
+        header === 'dt')
     ) {
       map.diksha_date = idx;
     }
-    // Unique ID / দীক্ষার নম্বর
+    // 2. Diksha Guru (Check early to distinguish from devotee name)
+    else if (
+      map.diksha_guru === -1 &&
+      (header.includes('guru') ||
+        header.includes('diksha guru') ||
+        header.includes('dikkha guru') ||
+        header.includes('guru name') ||
+        header.includes('দীক্ষাগুরু') ||
+        header.includes('দীক্ষা গুরু') ||
+        header.includes('দীক্ষাদাতা') ||
+        header.includes('শ্রীগুরু') ||
+        header.includes('গুরুদেব') ||
+        header.includes('গুরু') ||
+        header.includes('swami') ||
+        header.includes('মহারাজ'))
+    ) {
+      map.diksha_guru = idx;
+    }
+    // 3. Unique ID / Initiation Number
     else if (
       map.unique_id === -1 &&
       (header.includes('দীক্ষার নম্বর') ||
@@ -186,35 +211,26 @@ function mapHeadersToFields(headers: string[]): ColumnMapping {
         header.includes('দীক্ষা ক্রমিক') ||
         header.includes('diksha no') ||
         header.includes('diksha number') ||
+        header.includes('dikkha no') ||
         header.includes('initiation no') ||
+        header.includes('initiation number') ||
+        header.includes('unique id') ||
         header.includes('unique') ||
-        header.includes('id') ||
+        header.includes('ইউনিক আইডি') ||
         header.includes('আইডি') ||
+        header.includes('sl no') ||
         header.includes('sl') ||
         header.includes('code') ||
+        header.includes('serial') ||
+        header.includes('ক্রমিক') ||
         header.includes('নম্বর') ||
         header.includes('নং') ||
+        header === 'id' ||
         header === 'no')
     ) {
       map.unique_id = idx;
     }
-    // Name
-    else if (
-      map.name === -1 &&
-      (header.includes('name') ||
-        header.includes('নাম') ||
-        header.includes('ভক্তের নাম') ||
-        header.includes('devotee')) &&
-      !header.includes('father') &&
-      !header.includes('spouse') &&
-      !header.includes('পিতা') &&
-      !header.includes('স্বামী') &&
-      !header.includes('guru') &&
-      !header.includes('গুরু')
-    ) {
-      map.name = idx;
-    }
-    // Father or Spouse
+    // 4. Father or Spouse Name
     else if (
       map.father === -1 &&
       (header.includes('father') ||
@@ -223,15 +239,67 @@ function mapHeadersToFields(headers: string[]): ColumnMapping {
         header.includes('guardian') ||
         header.includes('পিতা') ||
         header.includes('স্বামী') ||
+        header.includes('পিতা/স্বামী') ||
+        header.includes('পিতা/স্বামীর নাম') ||
+        header.includes('পিতার নাম') ||
+        header.includes('স্বামীর নাম') ||
         header.includes('অভিভাবক'))
     ) {
       map.father = idx;
     }
-    // Age
-    else if (map.age === -1 && (header.includes('age') || header.includes('বয়স') || header.includes('বয়স'))) {
+    // 5. Age
+    else if (
+      map.age === -1 &&
+      (header.includes('age') ||
+        header.includes('বয়স') ||
+        header.includes('বয়স') ||
+        header.includes('years') ||
+        header.includes('বছর'))
+    ) {
       map.age = idx;
     }
-    // Address
+    // 6. Mobile / Phone Number
+    else if (
+      map.mobile === -1 &&
+      (header.includes('mobile') ||
+        header.includes('phone') ||
+        header.includes('contact') ||
+        header.includes('cell') ||
+        header.includes('tel') ||
+        header.includes('মোবাইল') ||
+        header.includes('ফোন') ||
+        header.includes('মুঠোফোন') ||
+        header.includes('যোগাযোগ'))
+    ) {
+      map.mobile = idx;
+    }
+    // 7. Occupation / Profession
+    else if (
+      map.occupation === -1 &&
+      (header.includes('occupation') ||
+        header.includes('profession') ||
+        header.includes('job') ||
+        header.includes('service') ||
+        header.includes('business') ||
+        header.includes('পেশা') ||
+        header.includes('কর্মসংস্থান') ||
+        header.includes('বৃত্তি'))
+    ) {
+      map.occupation = idx;
+    }
+    // 8. Education / Qualification
+    else if (
+      map.education === -1 &&
+      (header.includes('education') ||
+        header.includes('qualification') ||
+        header.includes('degree') ||
+        header.includes('শিক্ষা') ||
+        header.includes('শিক্ষাগত যোগ্যতা') ||
+        header.includes('যোগ্যতা'))
+    ) {
+      map.education = idx;
+    }
+    // 9. Address
     else if (
       map.address === -1 &&
       (header.includes('address') ||
@@ -240,54 +308,29 @@ function mapHeadersToFields(headers: string[]): ColumnMapping {
         header.includes('village') ||
         header.includes('গ্রাম') ||
         header.includes('জেলা') ||
-        header.includes('district'))
+        header.includes('district') ||
+        header.includes('স্থান'))
     ) {
       map.address = idx;
     }
-    // Mobile / Phone
+    // 10. Devotee Name (Catch general name if not father/spouse/guru)
     else if (
-      map.mobile === -1 &&
-      (header.includes('mobile') ||
-        header.includes('phone') ||
-        header.includes('contact') ||
-        header.includes('মোবাইল') ||
-        header.includes('ফোন') ||
-        header.includes('মুঠোফোন'))
+      map.name === -1 &&
+      (header.includes('name') ||
+        header.includes('নাম') ||
+        header.includes('ভক্তের নাম') ||
+        header.includes('দীক্ষিতের নাম') ||
+        header.includes('devotee') ||
+        header.includes('person') ||
+        header.includes('ব্যক্তি')) &&
+      !header.includes('father') &&
+      !header.includes('spouse') &&
+      !header.includes('পিতা') &&
+      !header.includes('স্বামী') &&
+      !header.includes('guru') &&
+      !header.includes('গুরু')
     ) {
-      map.mobile = idx;
-    }
-    // Occupation
-    else if (
-      map.occupation === -1 &&
-      (header.includes('occupation') ||
-        header.includes('profession') ||
-        header.includes('job') ||
-        header.includes('পেশা'))
-    ) {
-      map.occupation = idx;
-    }
-    // Education
-    else if (
-      map.education === -1 &&
-      (header.includes('education') ||
-        header.includes('qualification') ||
-        header.includes('ডিগ্রি') ||
-        header.includes('শিক্ষা') ||
-        header.includes('শিক্ষাগত যোগ্যতা') ||
-        header.includes('যোগ্যতা'))
-    ) {
-      map.education = idx;
-    }
-    // Diksha Guru
-    else if (
-      map.diksha_guru === -1 &&
-      (header.includes('guru') ||
-        header.includes('দীক্ষাগুরু') ||
-        header.includes('গুরু') ||
-        header.includes('swami') ||
-        header.includes('মহারাজ'))
-    ) {
-      map.diksha_guru = idx;
+      map.name = idx;
     }
   });
 

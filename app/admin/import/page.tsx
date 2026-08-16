@@ -76,8 +76,14 @@ export default function AdminImportPage() {
         records: selectedRecords.map((r) => ({
           unique_id: r.unique_id,
           name: r.name,
+          father_or_spouse_name: r.father_or_spouse_name || null,
+          age: r.age || null,
           address: r.address,
+          mobile_number: r.mobile_number || null,
+          occupation: r.occupation || null,
+          education: r.education || null,
           diksha_date: r.diksha_date || null,
+          diksha_guru: r.diksha_guru || null,
         })),
       };
 
@@ -114,7 +120,7 @@ export default function AdminImportPage() {
         <div className="mb-4">
           <h2 className="fw-bold text-dark mb-1">{t('importDocuments')}</h2>
           <p className="text-muted mb-0">
-            Upload Word (.docx) or PDF (.pdf) documents containing initiated person records.
+            Upload Word (.docx, .doc), Excel (.xlsx, .xls) or PDF (.pdf) documents containing initiated person records.
           </p>
         </div>
 
