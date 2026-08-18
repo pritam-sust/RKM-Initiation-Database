@@ -13,6 +13,8 @@ export interface RawParsedPerson {
   education?: string | null;
   diksha_date?: string | null;
   diksha_guru?: string | null;
+  diksha_venue?: string | null;
+  diksha_ceremony_serial?: string | null;
 }
 
 /**
@@ -52,7 +54,7 @@ export function isUniqueIdToken(token: string): boolean {
 }
 
 /**
- * Parses a single line starting with a Initiation Number or labeled with 'দীক্ষার নম্বর', 'ইউনিক আইডি', etc.
+ * Parses a single line starting with a Initiation Number or labeled with 'দীক্ষার নম্বর', etc.
  */
 export function parseUniqueIdLine(line: string): { unique_id: string; restOfLine: string } | null {
   const trimmed = line.trim();
@@ -307,6 +309,8 @@ export async function validateAndStatusRecords(
       education: rec.education || null,
       diksha_date: rec.diksha_date || null,
       diksha_guru: rec.diksha_guru || null,
+      diksha_venue: rec.diksha_venue || null,
+      diksha_ceremony_serial: rec.diksha_ceremony_serial || null,
       status,
       errorMessage,
       selected: status === 'valid',

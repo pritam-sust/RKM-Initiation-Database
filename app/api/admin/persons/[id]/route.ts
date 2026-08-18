@@ -52,7 +52,7 @@ export async function PUT(
       );
     }
 
-    const { unique_id, name, father_or_spouse_name, age, address, mobile_number, occupation, education, diksha_date, diksha_guru } = parseResult.data;
+    const { unique_id, name, father_or_spouse_name, age, address, mobile_number, occupation, education, diksha_date, diksha_guru, diksha_venue, diksha_ceremony_serial } = parseResult.data;
 
     // Check if unique_id is taken by another record
     const existing = await prisma.person.findFirst({
@@ -82,6 +82,8 @@ export async function PUT(
         education: education || null,
         diksha_date: diksha_date || null,
         diksha_guru: diksha_guru || null,
+        diksha_venue: diksha_venue || null,
+        diksha_ceremony_serial: diksha_ceremony_serial || null,
       },
     });
 

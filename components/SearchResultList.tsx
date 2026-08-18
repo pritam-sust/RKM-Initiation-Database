@@ -118,7 +118,7 @@ export default function SearchResultList({
         </h3>
         <p className="text-muted mb-4 max-w-md mx-auto small" style={{ lineHeight: '1.6' }}>
           {language === 'bn'
-            ? 'আপনার অনুসন্ধানের সাথে মিলিয়ে কোনো তথ্য খুঁজে পাওয়া যায়নি। অনুগ্রহ করে বানান পরীক্ষা করুন অথবা ইউনিক আইডি বা নামের অংশ দিয়ে অনুসন্ধান করুন।'
+            ? 'আপনার অনুসন্ধানের সাথে মিলিয়ে কোনো তথ্য খুঁজে পাওয়া যায়নি। অনুগ্রহ করে বানান পরীক্ষা করুন অথবা দীক্ষার নম্বর বা নামের অংশ দিয়ে অনুসন্ধান করুন।'
             : "We couldn't find any records matching your search criteria. Try searching with a partial name, Bengali script, or checking for typos."}
         </p>
 

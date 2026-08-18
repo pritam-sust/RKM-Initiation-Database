@@ -11,6 +11,7 @@ export const en = {
   noResultsTitle: 'No Records Found',
   noResultsSub: 'Try searching with a different Initiation Number, Name, or Diksha Guru.',
   uniqueId: 'Initiation Number',
+  uniqueIdPlaceholder: 'e.g. CA123456, DA6140 (comma separated)',
   name: 'Devotee Name',
   fatherOrSpouseName: 'Father/Spouse Name',
   age: 'Age',
@@ -21,6 +22,8 @@ export const en = {
   occupation: 'Occupation',
   education: 'Education',
   dikshaGuru: 'Diksha Guru',
+  dikshaVenue: 'Diksha Venue',
+  dikshaCeremonySerial: "Guru's Diksha Ceremony Serial",
   actions: 'Actions',
   viewDetails: 'View Details',
   adminLogin: 'Admin Login',
@@ -66,6 +69,12 @@ export const en = {
   filterByField: 'Filter by specific fields',
   activeFiltersCount: 'active filters',
 
+  // Spiritual Pillars
+  renunciation: 'Renunciation',
+  jnana: 'Jnana',
+  karma: 'Karma',
+  bhakti: 'Bhakti',
+
   // Sorting & Pagination
   sortBy: 'Sort by',
   sortOrder: 'Order',
@@ -75,6 +84,7 @@ export const en = {
   sortByGuru: 'Diksha Guru',
   sortByDate: 'Diksha Date',
   sortById: 'Initiation Number',
+  sortByVenue: 'Diksha Venue',
   sortByRecent: 'Recently Added',
   sortByEntryDate: 'Entry Date',
   perPage: 'Per page',

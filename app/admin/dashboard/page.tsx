@@ -18,10 +18,10 @@ import {
   ChevronDown,
   ChevronUp,
   Clock,
+  Compass,
   Edit3,
   Eye,
   MinusSquare,
-  Phone,
   Plus,
   RotateCcw,
   Search,
@@ -80,6 +80,8 @@ export default function AdminDashboardPage() {
       if (filters.education?.trim()) params.set('education', filters.education.trim());
       if (filters.diksha_date?.trim()) params.set('diksha_date', filters.diksha_date.trim());
       if (filters.diksha_guru?.trim()) params.set('diksha_guru', filters.diksha_guru.trim());
+      if (filters.diksha_venue?.trim()) params.set('diksha_venue', filters.diksha_venue.trim());
+      if (filters.diksha_ceremony_serial?.trim()) params.set('diksha_ceremony_serial', filters.diksha_ceremony_serial.trim());
 
       params.set('page', String(page));
       params.set('limit', String(limit));
@@ -115,6 +117,8 @@ export default function AdminDashboardPage() {
     'education',
     'diksha_date',
     'diksha_guru',
+    'diksha_venue',
+    'diksha_ceremony_serial',
   ];
 
   const activeFilterCount = specificFilterKeys.reduce((acc, key) => {
@@ -146,6 +150,8 @@ export default function AdminDashboardPage() {
       education: '',
       diksha_date: '',
       diksha_guru: '',
+      diksha_venue: '',
+      diksha_ceremony_serial: '',
     });
     setPage(1);
     setSelectedIds(new Set());
@@ -259,7 +265,7 @@ export default function AdminDashboardPage() {
               />
               <button
                 type="button"
-                className={`btn btn-sm d-flex align-items-center gap-1 px-3 py-2 rounded-3 border transition-all ${
+                className={`btn btn-sm d-flex align-items-center gap-1.5 px-3 py-2 rounded-3 border transition-all ${
                   showAdvanced || activeFilterCount > 0
                     ? 'btn-light border-secondary text-dark fw-bold'
                     : 'btn-light border-slate-200 text-secondary'
@@ -316,15 +322,19 @@ export default function AdminDashboardPage() {
             </div>
 
             <div className="row g-3">
+              {/* Comma-separated Unique IDs */}
               <div className="col-12 col-sm-6 col-lg-4">
                 <label className="form-label-custom">{t('uniqueId')}</label>
                 <input
                   type="text"
                   className="form-control-custom font-mono"
-                  placeholder={t('uniqueId')}
+                  placeholder={t('uniqueIdPlaceholder')}
                   value={filters.unique_id || ''}
                   onChange={(e) => handleFieldChange('unique_id', e.target.value)}
                 />
+                <span className="extra-small text-muted mt-1 d-block" style={{ fontSize: '0.7rem' }}>
+                  {language === 'bn' ? 'কমা (,) দিয়ে একাধিক নম্বর খুঁজুন' : 'Separate multiple IDs with commas'}
+                </span>
               </div>
 
               <div className="col-12 col-sm-6 col-lg-4">
@@ -346,6 +356,50 @@ export default function AdminDashboardPage() {
                   placeholder={t('fatherOrSpouseName')}
                   value={filters.father_or_spouse_name || ''}
                   onChange={(e) => handleFieldChange('father_or_spouse_name', e.target.value)}
+                />
+              </div>
+
+              <div className="col-12 col-sm-6 col-lg-3">
+                <label className="form-label-custom">{t('dikshaVenue')}</label>
+                <input
+                  type="text"
+                  className="form-control-custom"
+                  placeholder={t('dikshaVenue')}
+                  value={filters.diksha_venue || ''}
+                  onChange={(e) => handleFieldChange('diksha_venue', e.target.value)}
+                />
+              </div>
+
+              <div className="col-12 col-sm-6 col-lg-3">
+                <label className="form-label-custom">{t('dikshaCeremonySerial')}</label>
+                <input
+                  type="text"
+                  className="form-control-custom font-mono"
+                  placeholder={t('dikshaCeremonySerial')}
+                  value={filters.diksha_ceremony_serial || ''}
+                  onChange={(e) => handleFieldChange('diksha_ceremony_serial', e.target.value)}
+                />
+              </div>
+
+              <div className="col-12 col-sm-6 col-lg-3">
+                <label className="form-label-custom">{t('dikshaGuru')}</label>
+                <input
+                  type="text"
+                  className="form-control-custom"
+                  placeholder={t('dikshaGuru')}
+                  value={filters.diksha_guru || ''}
+                  onChange={(e) => handleFieldChange('diksha_guru', e.target.value)}
+                />
+              </div>
+
+              <div className="col-12 col-sm-6 col-lg-3">
+                <label className="form-label-custom">{t('dikshaDate')}</label>
+                <input
+                  type="text"
+                  className="form-control-custom"
+                  placeholder={t('dikshaDate')}
+                  value={filters.diksha_date || ''}
+                  onChange={(e) => handleFieldChange('diksha_date', e.target.value)}
                 />
               </div>
 
@@ -372,28 +426,6 @@ export default function AdminDashboardPage() {
               </div>
 
               <div className="col-12 col-sm-6 col-lg-3">
-                <label className="form-label-custom">{t('dikshaGuru')}</label>
-                <input
-                  type="text"
-                  className="form-control-custom"
-                  placeholder={t('dikshaGuru')}
-                  value={filters.diksha_guru || ''}
-                  onChange={(e) => handleFieldChange('diksha_guru', e.target.value)}
-                />
-              </div>
-
-              <div className="col-12 col-sm-6 col-lg-3">
-                <label className="form-label-custom">{t('dikshaDate')}</label>
-                <input
-                  type="text"
-                  className="form-control-custom"
-                  placeholder={t('dikshaDate')}
-                  value={filters.diksha_date || ''}
-                  onChange={(e) => handleFieldChange('diksha_date', e.target.value)}
-                />
-              </div>
-
-              <div className="col-12 col-sm-6 col-lg-4">
                 <label className="form-label-custom">{t('occupation')}</label>
                 <input
                   type="text"
@@ -404,7 +436,7 @@ export default function AdminDashboardPage() {
                 />
               </div>
 
-              <div className="col-12 col-sm-6 col-lg-4">
+              <div className="col-12 col-sm-6 col-lg-3">
                 <label className="form-label-custom">{t('education')}</label>
                 <input
                   type="text"
@@ -415,7 +447,7 @@ export default function AdminDashboardPage() {
                 />
               </div>
 
-              <div className="col-12 col-sm-6 col-lg-4">
+              <div className="col-12">
                 <label className="form-label-custom">{t('address')}</label>
                 <input
                   type="text"
@@ -458,7 +490,7 @@ export default function AdminDashboardPage() {
 
               <button
                 type="button"
-                className="btn btn-sm btn-danger d-flex align-items-center gap-1 px-3.5 py-1.5 fw-bold shadow-sm"
+                className="btn btn-sm btn-danger d-flex align-items-center gap-1.5 px-3.5 py-1.5 fw-bold shadow-sm"
                 onClick={() => setIsBulkDeleteModalOpen(true)}
               >
                 <Trash2 size={15} />
@@ -486,7 +518,7 @@ export default function AdminDashboardPage() {
               {selectedIds.size > 0 && (
                 <button
                   type="button"
-                  className="btn btn-sm btn-outline-danger d-flex align-items-center gap-1 px-3 py-1.5 fw-semibold"
+                  className="btn btn-sm btn-outline-danger d-flex align-items-center gap-1.5 px-3 py-1.5 fw-semibold"
                   onClick={() => setIsBulkDeleteModalOpen(true)}
                 >
                   <Trash2 size={14} />
@@ -544,7 +576,7 @@ export default function AdminDashboardPage() {
 
                     {/* Sortable Initiation Number */}
                     <th
-                      style={{ width: '130px' }}
+                      style={{ width: '135px' }}
                       className={`th-sortable ${sortBy === 'unique_id' ? 'active text-primary' : ''}`}
                       onClick={() => handleSortColumn('unique_id')}
                       title={`Click to sort by ${t('uniqueId')}`}
@@ -581,22 +613,9 @@ export default function AdminDashboardPage() {
                       </div>
                     </th>
 
-                    {/* Sortable Mobile */}
-                    <th
-                      style={{ width: '125px' }}
-                      className={`th-sortable ${sortBy === 'mobile_number' ? 'active text-primary' : ''}`}
-                      onClick={() => handleSortColumn('mobile_number')}
-                      title={`Click to sort by ${t('mobileNumber')}`}
-                    >
-                      <div className="d-flex align-items-center justify-content-between">
-                        <span>{t('mobileNumber')}</span>
-                        {renderSortIndicator('mobile_number')}
-                      </div>
-                    </th>
-
                     {/* Sortable Diksha Date */}
                     <th
-                      style={{ width: '120px' }}
+                      style={{ width: '125px' }}
                       className={`th-sortable ${sortBy === 'diksha_date' ? 'active text-primary' : ''}`}
                       onClick={() => handleSortColumn('diksha_date')}
                       title={`Click to sort by ${t('dikshaDate')}`}
@@ -609,7 +628,7 @@ export default function AdminDashboardPage() {
 
                     {/* Sortable Diksha Guru */}
                     <th
-                      style={{ width: '145px' }}
+                      style={{ width: '150px' }}
                       className={`th-sortable ${sortBy === 'diksha_guru' ? 'active text-primary' : ''}`}
                       onClick={() => handleSortColumn('diksha_guru')}
                       title={`Click to sort by ${t('dikshaGuru')}`}
@@ -617,6 +636,19 @@ export default function AdminDashboardPage() {
                       <div className="d-flex align-items-center justify-content-between">
                         <span>{t('dikshaGuru')}</span>
                         {renderSortIndicator('diksha_guru')}
+                      </div>
+                    </th>
+
+                    {/* Sortable Diksha Venue (Added in place of Address and Mobile Number) */}
+                    <th
+                      style={{ width: '160px' }}
+                      className={`th-sortable ${sortBy === 'diksha_venue' ? 'active text-primary' : ''}`}
+                      onClick={() => handleSortColumn('diksha_venue')}
+                      title={`Click to sort by ${t('dikshaVenue')}`}
+                    >
+                      <div className="d-flex align-items-center justify-content-between">
+                        <span>{t('dikshaVenue')}</span>
+                        {renderSortIndicator('diksha_venue')}
                       </div>
                     </th>
 
@@ -630,18 +662,6 @@ export default function AdminDashboardPage() {
                       <div className="d-flex align-items-center justify-content-between">
                         <span>{t('entryDate')}</span>
                         {renderSortIndicator('created_at')}
-                      </div>
-                    </th>
-
-                    {/* Sortable Address */}
-                    <th
-                      className={`th-sortable ${sortBy === 'address' ? 'active text-primary' : ''}`}
-                      onClick={() => handleSortColumn('address')}
-                      title={`Click to sort by ${t('address')}`}
-                    >
-                      <div className="d-flex align-items-center justify-content-between">
-                        <span>{t('address')}</span>
-                        {renderSortIndicator('address')}
                       </div>
                     </th>
 
@@ -688,16 +708,6 @@ export default function AdminDashboardPage() {
                           <span className="text-secondary small">{p.father_or_spouse_name || '—'}</span>
                         </td>
                         <td>
-                          {p.mobile_number ? (
-                            <span className="chip-tag chip-green font-mono">
-                              <Phone size={11} />
-                              <span>{p.mobile_number}</span>
-                            </span>
-                          ) : (
-                            <span className="text-muted small">—</span>
-                          )}
-                        </td>
-                        <td>
                           {p.diksha_date ? (
                             <span className="chip-tag chip-orange">
                               <Calendar size={11} />
@@ -717,18 +727,27 @@ export default function AdminDashboardPage() {
                             <span className="text-muted small">—</span>
                           )}
                         </td>
+
+                        {/* Diksha Venue Cell */}
+                        <td>
+                          {p.diksha_venue ? (
+                            <div className="d-flex align-items-center gap-1.5 small text-dark fw-medium text-truncate" style={{ maxWidth: '170px' }} title={p.diksha_venue}>
+                              <Compass size={13} className="text-primary flex-shrink-0" />
+                              <span className="text-truncate">{p.diksha_venue}</span>
+                            </div>
+                          ) : (
+                            <span className="text-muted small">—</span>
+                          )}
+                        </td>
+
                         {/* Entry Date */}
                         <td>
-                          <div className="d-flex align-items-center gap-1 text-secondary small font-mono" title={p.created_at ? new Date(p.created_at).toLocaleString() : ''}>
+                          <div className="d-flex align-items-center gap-1.5 text-secondary small font-mono" title={p.created_at ? new Date(p.created_at).toLocaleString() : ''}>
                             <Clock size={12} className="text-muted flex-shrink-0" />
                             <span>{formattedEntryDate}</span>
                           </div>
                         </td>
-                        <td>
-                          <div className="whitespace-pre-line small text-secondary text-truncate-2" style={{ maxWidth: '200px' }}>
-                            {p.address}
-                          </div>
-                        </td>
+
                         <td className="text-end">
                           <div className="d-inline-flex align-items-center gap-1">
                             <button

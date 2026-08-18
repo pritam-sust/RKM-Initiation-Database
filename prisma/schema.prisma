@@ -19,6 +19,8 @@ model Person {
   education              String?
   diksha_date            String?  @map("diksha_date")
   diksha_guru            String?  @map("diksha_guru")
+  diksha_venue           String?  @map("diksha_venue")
+  diksha_ceremony_serial String?  @map("diksha_ceremony_serial")
   created_at             DateTime @default(now()) @map("created_at")
   updated_at             DateTime @updatedAt @map("updated_at")
 

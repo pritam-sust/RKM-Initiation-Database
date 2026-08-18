@@ -145,10 +145,11 @@ export default function ImportPreviewTable({
                 </th>
                 <th style={{ width: '130px' }}>{t('uniqueId')}</th>
                 <th style={{ width: '170px' }}>{t('name')}</th>
-                <th style={{ width: '150px' }}>{t('fatherOrSpouseName')}</th>
-                <th style={{ width: '115px' }}>{t('mobileNumber')}</th>
+                <th style={{ width: '140px' }}>{t('fatherOrSpouseName')}</th>
                 <th style={{ width: '110px' }}>{t('dikshaDate')}</th>
                 <th style={{ width: '140px' }}>{t('dikshaGuru')}</th>
+                <th style={{ width: '130px' }}>{t('dikshaVenue')}</th>
+                <th style={{ width: '140px' }}>{t('dikshaCeremonySerial')}</th>
                 <th>{t('address')}</th>
                 <th style={{ width: '110px' }}>Status</th>
               </tr>
@@ -184,10 +185,11 @@ export default function ImportPreviewTable({
                     </td>
                     <td className="fw-bold text-dark">{rec.name}</td>
                     <td className="small text-secondary">{rec.father_or_spouse_name || '—'}</td>
-                    <td className="small font-mono">{rec.mobile_number || '—'}</td>
                     <td className="small">{rec.diksha_date || '—'}</td>
                     <td className="small">{rec.diksha_guru || '—'}</td>
-                    <td className="whitespace-pre-line small text-secondary text-truncate-2" style={{ maxWidth: '200px' }}>
+                    <td className="small">{rec.diksha_venue || '—'}</td>
+                    <td className="small">{rec.diksha_ceremony_serial || '—'}</td>
+                    <td className="whitespace-pre-line small text-secondary text-truncate-2" style={{ maxWidth: '180px' }}>
                       {rec.address}
                     </td>
                     <td>

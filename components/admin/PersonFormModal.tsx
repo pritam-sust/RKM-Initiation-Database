@@ -30,6 +30,8 @@ export default function PersonFormModal({
   const [education, setEducation] = useState('');
   const [dikshaDate, setDikshaDate] = useState('');
   const [dikshaGuru, setDikshaGuru] = useState('');
+  const [dikshaVenue, setDikshaVenue] = useState('');
+  const [dikshaCeremonySerial, setDikshaCeremonySerial] = useState('');
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -46,6 +48,8 @@ export default function PersonFormModal({
       setEducation(person.education || '');
       setDikshaDate(person.diksha_date || '');
       setDikshaGuru(person.diksha_guru || '');
+      setDikshaVenue(person.diksha_venue || '');
+      setDikshaCeremonySerial(person.diksha_ceremony_serial || '');
     } else {
       setUniqueId('');
       setName('');
@@ -57,6 +61,8 @@ export default function PersonFormModal({
       setEducation('');
       setDikshaDate('');
       setDikshaGuru('');
+      setDikshaVenue('');
+      setDikshaCeremonySerial('');
     }
     setError(null);
   }, [person, isOpen]);
@@ -79,6 +85,8 @@ export default function PersonFormModal({
       education: education.trim() || null,
       diksha_date: dikshaDate.trim() || null,
       diksha_guru: dikshaGuru.trim() || null,
+      diksha_venue: dikshaVenue.trim() || null,
+      diksha_ceremony_serial: dikshaCeremonySerial.trim() || null,
     };
 
     try {
@@ -184,6 +192,30 @@ export default function PersonFormModal({
                 />
               </div>
 
+              {/* Diksha Venue */}
+              <div className="col-12 col-md-6">
+                <label className="form-label-custom">{t('dikshaVenue')}</label>
+                <input
+                  type="text"
+                  className="form-control-custom"
+                  placeholder="e.g. Sylhet Ashram or সিলেট রামকৃষ্ণ মিশন"
+                  value={dikshaVenue}
+                  onChange={(e) => setDikshaVenue(e.target.value)}
+                />
+              </div>
+
+              {/* Guru Diksha Ceremony Serial */}
+              <div className="col-12 col-md-6">
+                <label className="form-label-custom">{t('dikshaCeremonySerial')}</label>
+                <input
+                  type="text"
+                  className="form-control-custom"
+                  placeholder="e.g. 45th or ৪৫তম"
+                  value={dikshaCeremonySerial}
+                  onChange={(e) => setDikshaCeremonySerial(e.target.value)}
+                />
+              </div>
+
               {/* Name */}
               <div className="col-12 col-md-6">
                 <label className="form-label-custom">
@@ -253,7 +285,7 @@ export default function PersonFormModal({
                 <input
                   type="text"
                   className="form-control-custom"
-                  placeholder="e.g. B.Sc."
+                  placeholder="e.g. B.A., M.Sc."
                   value={education}
                   onChange={(e) => setEducation(e.target.value)}
                 />
@@ -280,7 +312,7 @@ export default function PersonFormModal({
           <div className="px-4 py-3 bg-light border-top border-slate-200 d-flex justify-content-end gap-2">
             <button
               type="button"
-              className="btn btn-sm btn-rkm-secondary px-3"
+              className="btn btn-sm btn-rkm-secondary px-4"
               onClick={onClose}
               disabled={isLoading}
             >
@@ -298,7 +330,7 @@ export default function PersonFormModal({
                 </>
               ) : (
                 <>
-                  <Save size={15} />
+                  <Save size={16} />
                   <span>{t('save')}</span>
                 </>
               )}

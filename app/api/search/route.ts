@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
 import { getAdminSession } from '@/lib/auth';
+import { prisma } from '@/lib/db';
 import { Prisma } from '@prisma/client';
+import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
   try {
@@ -23,6 +23,8 @@ export async function GET(request: NextRequest) {
       name: 'name',
       diksha_guru: 'diksha_guru',
       diksha_date: 'diksha_date',
+      diksha_venue: 'diksha_venue',
+      diksha_ceremony_serial: 'diksha_ceremony_serial',
       unique_id: 'unique_id',
       created_at: 'created_at',
       updated_at: 'updated_at',
@@ -47,31 +49,67 @@ export async function GET(request: NextRequest) {
     const education = searchParams.get('education')?.trim();
     const diksha_date = searchParams.get('diksha_date')?.trim();
     const diksha_guru = searchParams.get('diksha_guru')?.trim();
+    const diksha_venue = searchParams.get('diksha_venue')?.trim();
+    const diksha_ceremony_serial = searchParams.get('diksha_ceremony_serial')?.trim();
 
     const conditions: Prisma.PersonWhereInput[] = [];
 
     // Global partial text search across all schema fields
     if (query) {
-      conditions.push({
-        OR: [
-          { unique_id: { contains: query, mode: 'insensitive' } },
-          { name: { contains: query, mode: 'insensitive' } },
-          { father_or_spouse_name: { contains: query, mode: 'insensitive' } },
-          { age: { contains: query, mode: 'insensitive' } },
-          { address: { contains: query, mode: 'insensitive' } },
-          { mobile_number: { contains: query, mode: 'insensitive' } },
-          { occupation: { contains: query, mode: 'insensitive' } },
-          { education: { contains: query, mode: 'insensitive' } },
-          { diksha_date: { contains: query, mode: 'insensitive' } },
-          { diksha_guru: { contains: query, mode: 'insensitive' } },
-        ],
-      });
+      // Check if global query has commas (multiple IDs or search terms)
+      if (query.includes(',') || query.includes('，') || query.includes('、')) {
+        const queryTokens = query
+          .split(/[,，、]+/)
+          .map((s) => s.trim())
+          .filter((s) => s.length > 0);
+
+        if (queryTokens.length > 1) {
+          conditions.push({
+            OR: queryTokens.flatMap((token) => [
+              { unique_id: { contains: token, mode: 'insensitive' as const } },
+              { name: { contains: token, mode: 'insensitive' as const } },
+              { diksha_guru: { contains: token, mode: 'insensitive' as const } },
+            ]),
+          });
+        }
+      } else {
+        conditions.push({
+          OR: [
+            { unique_id: { contains: query, mode: 'insensitive' } },
+            { name: { contains: query, mode: 'insensitive' } },
+            { father_or_spouse_name: { contains: query, mode: 'insensitive' } },
+            { age: { contains: query, mode: 'insensitive' } },
+            { address: { contains: query, mode: 'insensitive' } },
+            { mobile_number: { contains: query, mode: 'insensitive' } },
+            { occupation: { contains: query, mode: 'insensitive' } },
+            { education: { contains: query, mode: 'insensitive' } },
+            { diksha_date: { contains: query, mode: 'insensitive' } },
+            { diksha_guru: { contains: query, mode: 'insensitive' } },
+            { diksha_venue: { contains: query, mode: 'insensitive' } },
+            { diksha_ceremony_serial: { contains: query, mode: 'insensitive' } },
+          ],
+        });
+      }
     }
 
-    // Individual item filters (partial matching)
+    // Support comma-separated Unique IDs / Initiation Numbers
     if (unique_id) {
-      conditions.push({ unique_id: { contains: unique_id, mode: 'insensitive' } });
+      const idTokens = unique_id
+        .split(/[,，、]+/)
+        .map((s) => s.trim())
+        .filter((s) => s.length > 0);
+
+      if (idTokens.length > 1) {
+        conditions.push({
+          OR: idTokens.map((token) => ({
+            unique_id: { contains: token, mode: 'insensitive' as const },
+          })),
+        });
+      } else if (idTokens.length === 1) {
+        conditions.push({ unique_id: { contains: idTokens[0], mode: 'insensitive' } });
+      }
     }
+
     if (name) {
       conditions.push({ name: { contains: name, mode: 'insensitive' } });
     }
@@ -99,6 +137,12 @@ export async function GET(request: NextRequest) {
     if (diksha_guru) {
       conditions.push({ diksha_guru: { contains: diksha_guru, mode: 'insensitive' } });
     }
+    if (diksha_venue) {
+      conditions.push({ diksha_venue: { contains: diksha_venue, mode: 'insensitive' } });
+    }
+    if (diksha_ceremony_serial) {
+      conditions.push({ diksha_ceremony_serial: { contains: diksha_ceremony_serial, mode: 'insensitive' } });
+    }
 
     const whereClause: Prisma.PersonWhereInput =
       conditions.length === 0
@@ -119,6 +163,7 @@ export async function GET(request: NextRequest) {
 
     // Format sanitized data based on authentication:
     // Without admin access: users can only view unique_id, name, diksha_date, diksha_guru
+    // All other fields including diksha_venue, diksha_ceremony_serial, address, mobile, etc. are restricted to admins only
     const formattedData = persons.map((p) => {
       if (isAdmin) {
         return p;
@@ -129,6 +174,8 @@ export async function GET(request: NextRequest) {
         name: p.name,
         diksha_date: p.diksha_date,
         diksha_guru: p.diksha_guru,
+        diksha_venue: null,
+        diksha_ceremony_serial: null,
         father_or_spouse_name: null,
         age: null,
         address: '',

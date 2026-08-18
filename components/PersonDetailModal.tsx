@@ -2,20 +2,23 @@
 
 import { PersonRecord } from '@/types';
 import {
-    Award,
-    Briefcase,
-    Calendar,
-    Clock,
-    GraduationCap,
-    Lock,
-    MapPin,
-    Phone,
-    Sparkles,
-    Tag,
-    User,
-    Users,
-    X,
+  Award,
+  Briefcase,
+  Calendar,
+  Clock,
+  GraduationCap,
+  Lock,
+  MapPin,
+  Phone,
+  Sparkles,
+  Tag,
+  User,
+  Users,
+  X,
+  Compass,
+  Layers,
 } from 'lucide-react';
+import React from 'react';
 import { useLanguage } from './LanguageProvider';
 
 interface PersonDetailModalProps {
@@ -28,14 +31,16 @@ export default function PersonDetailModal({ person, onClose }: PersonDetailModal
 
   if (!person) return null;
 
-  // Determine if this is an admin view (contains confidential address/mobile/father info) or public view
+  // Determine if this is an admin view (contains confidential address/mobile/father info/venue) or public view
   const hasConfidentialData = !!(
     person.address ||
     person.mobile_number ||
     person.father_or_spouse_name ||
     person.age ||
     person.occupation ||
-    person.education
+    person.education ||
+    person.diksha_venue ||
+    person.diksha_ceremony_serial
   );
 
   return (
@@ -118,7 +123,7 @@ export default function PersonDetailModal({ person, onClose }: PersonDetailModal
             <div className="row g-3.5">
               <div className="col-12 col-md-4">
                 <div className="kv-item">
-                  <span className="kv-label d-flex align-items-center gap-1">
+                  <span className="kv-label d-flex align-items-center gap-1.5">
                     <Tag size={13} className="text-secondary" />
                     {t('uniqueId')}
                   </span>
@@ -127,7 +132,7 @@ export default function PersonDetailModal({ person, onClose }: PersonDetailModal
               </div>
               <div className="col-12 col-md-4">
                 <div className="kv-item">
-                  <span className="kv-label d-flex align-items-center gap-1">
+                  <span className="kv-label d-flex align-items-center gap-1.5">
                     <Calendar size={13} className="text-secondary" />
                     {t('dikshaDate')}
                   </span>
@@ -138,7 +143,7 @@ export default function PersonDetailModal({ person, onClose }: PersonDetailModal
               </div>
               <div className="col-12 col-md-4">
                 <div className="kv-item">
-                  <span className="kv-label d-flex align-items-center gap-1">
+                  <span className="kv-label d-flex align-items-center gap-1.5">
                     <Award size={13} className="text-secondary" />
                     {t('dikshaGuru')}
                   </span>
@@ -147,6 +152,34 @@ export default function PersonDetailModal({ person, onClose }: PersonDetailModal
                   </span>
                 </div>
               </div>
+
+              {/* Admin-only Ceremony Details */}
+              {hasConfidentialData && (person.diksha_venue || person.diksha_ceremony_serial) && (
+                <>
+                  {person.diksha_venue && (
+                    <div className="col-12 col-md-6">
+                      <div className="kv-item">
+                        <span className="kv-label d-flex align-items-center gap-1.5">
+                          <Compass size={13} className="text-secondary" />
+                          {t('dikshaVenue')}
+                        </span>
+                        <span className="kv-value">{person.diksha_venue}</span>
+                      </div>
+                    </div>
+                  )}
+                  {person.diksha_ceremony_serial && (
+                    <div className="col-12 col-md-6">
+                      <div className="kv-item">
+                        <span className="kv-label d-flex align-items-center gap-1.5">
+                          <Layers size={13} className="text-secondary" />
+                          {t('dikshaCeremonySerial')}
+                        </span>
+                        <span className="kv-value font-mono">{person.diksha_ceremony_serial}</span>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           </div>
 
@@ -162,7 +195,7 @@ export default function PersonDetailModal({ person, onClose }: PersonDetailModal
                 <div className="row g-3.5">
                   <div className="col-6 col-md-3">
                     <div className="kv-item">
-                      <span className="kv-label d-flex align-items-center gap-1">
+                      <span className="kv-label d-flex align-items-center gap-1.5">
                         <Users size={13} className="text-secondary" />
                         {t('age')}
                       </span>
@@ -173,7 +206,7 @@ export default function PersonDetailModal({ person, onClose }: PersonDetailModal
                   </div>
                   <div className="col-6 col-md-3">
                     <div className="kv-item">
-                      <span className="kv-label d-flex align-items-center gap-1">
+                      <span className="kv-label d-flex align-items-center gap-1.5">
                         <Phone size={13} className="text-secondary" />
                         {t('mobileNumber')}
                       </span>
@@ -184,7 +217,7 @@ export default function PersonDetailModal({ person, onClose }: PersonDetailModal
                   </div>
                   <div className="col-6 col-md-3">
                     <div className="kv-item">
-                      <span className="kv-label d-flex align-items-center gap-1">
+                      <span className="kv-label d-flex align-items-center gap-1.5">
                         <Briefcase size={13} className="text-secondary" />
                         {t('occupation')}
                       </span>
@@ -195,7 +228,7 @@ export default function PersonDetailModal({ person, onClose }: PersonDetailModal
                   </div>
                   <div className="col-6 col-md-3">
                     <div className="kv-item">
-                      <span className="kv-label d-flex align-items-center gap-1">
+                      <span className="kv-label d-flex align-items-center gap-1.5">
                         <GraduationCap size={13} className="text-secondary" />
                         {t('education')}
                       </span>
@@ -223,7 +256,7 @@ export default function PersonDetailModal({ person, onClose }: PersonDetailModal
               {/* Section 4: System Entry Date */}
               {person.created_at && (
                 <div className="d-flex align-items-center justify-content-between p-2.5 px-3 bg-light rounded-3 text-muted small">
-                  <span className="d-flex align-items-center gap-1 extra-small">
+                  <span className="d-flex align-items-center gap-1.5 extra-small">
                     <Clock size={12} />
                     <span>{t('entryDate')}:</span>
                   </span>
@@ -241,8 +274,8 @@ export default function PersonDetailModal({ person, onClose }: PersonDetailModal
               <Lock size={16} className="text-secondary mt-0.5 flex-shrink-0" />
               <div className="extra-small text-muted" style={{ fontSize: '0.75rem', lineHeight: '1.5' }}>
                 {language === 'bn'
-                  ? 'গোপনীয়তা সুরক্ষার জন্য ব্যক্তিগত যোগাযোগের তথ্য ও ঠিকানা জনসাধারণের জন্য উন্মুক্ত নয়। অনুমোদিত প্রশাসকগণ লগইন করে সম্পূর্ণ বিবরণ দেখতে পারেন।'
-                  : 'To protect devotee privacy, personal contact numbers and residential addresses are restricted to authorized Ashram administrators.'}
+                  ? 'গোপনীয়তা সুরক্ষার জন্য ব্যক্তিগত যোগাযোগের তথ্য, দীক্ষানুষ্ঠানের ভেন্যু ও ঠিকানা জনসাধারণের জন্য উন্মুক্ত নয়। অনুমোদিত প্রশাসকগণ লগইন করে সম্পূর্ণ বিবরণ দেখতে পারেন।'
+                  : 'To protect devotee privacy, personal contact numbers, ceremony venues, and residential addresses are restricted to authorized Ashram administrators.'}
               </div>
             </div>
           )}

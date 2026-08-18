@@ -11,6 +11,8 @@ export const personSchema = z.object({
   education: z.string().trim().optional().nullable(),
   diksha_date: z.string().trim().optional().nullable(),
   diksha_guru: z.string().trim().optional().nullable(),
+  diksha_venue: z.string().trim().optional().nullable(),
+  diksha_ceremony_serial: z.string().trim().optional().nullable(),
 });
 
 export const loginSchema = z.object({
@@ -31,6 +33,8 @@ export const bulkImportSchema = z.object({
       education: z.string().trim().optional().nullable(),
       diksha_date: z.string().trim().optional().nullable(),
       diksha_guru: z.string().trim().optional().nullable(),
+      diksha_venue: z.string().trim().optional().nullable(),
+      diksha_ceremony_serial: z.string().trim().optional().nullable(),
     })
   ).min(1, 'At least one record must be selected for import'),
 });

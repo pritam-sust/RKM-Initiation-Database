@@ -12,7 +12,7 @@ interface SearchFormProps {
 }
 
 export default function SearchForm({ initialFilters, onSearch, isLoading }: SearchFormProps) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [filters, setFilters] = useState<PersonFilterOptions>(initialFilters);
 
@@ -159,10 +159,13 @@ export default function SearchForm({ initialFilters, onSearch, isLoading }: Sear
               <input
                 type="text"
                 className="form-control-custom font-mono"
-                placeholder={t('uniqueId')}
+                placeholder={t('uniqueIdPlaceholder')}
                 value={filters.unique_id || ''}
                 onChange={(e) => handleFieldChange('unique_id', e.target.value)}
               />
+              <span className="extra-small text-muted mt-1 d-block" style={{ fontSize: '0.7rem' }}>
+                {language === 'bn' ? 'কমা (,) দিয়ে একাধিক নম্বর খুঁজুন' : 'Separate multiple IDs with commas'}
+              </span>
             </div>
 
             <div className="col-12 col-sm-6 col-lg-3">

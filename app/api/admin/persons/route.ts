@@ -25,6 +25,8 @@ export async function GET(request: NextRequest) {
       name: 'name',
       diksha_guru: 'diksha_guru',
       diksha_date: 'diksha_date',
+      diksha_venue: 'diksha_venue',
+      diksha_ceremony_serial: 'diksha_ceremony_serial',
       unique_id: 'unique_id',
       created_at: 'created_at',
       updated_at: 'updated_at',
@@ -52,27 +54,67 @@ export async function GET(request: NextRequest) {
     const education = searchParams.get('education')?.trim();
     const diksha_date = searchParams.get('diksha_date')?.trim();
     const diksha_guru = searchParams.get('diksha_guru')?.trim();
+    const diksha_venue = searchParams.get('diksha_venue')?.trim();
+    const diksha_ceremony_serial = searchParams.get('diksha_ceremony_serial')?.trim();
 
     const conditions: Prisma.PersonWhereInput[] = [];
 
     if (query) {
-      conditions.push({
-        OR: [
-          { unique_id: { contains: query, mode: 'insensitive' } },
-          { name: { contains: query, mode: 'insensitive' } },
-          { father_or_spouse_name: { contains: query, mode: 'insensitive' } },
-          { age: { contains: query, mode: 'insensitive' } },
-          { address: { contains: query, mode: 'insensitive' } },
-          { mobile_number: { contains: query, mode: 'insensitive' } },
-          { occupation: { contains: query, mode: 'insensitive' } },
-          { education: { contains: query, mode: 'insensitive' } },
-          { diksha_date: { contains: query, mode: 'insensitive' } },
-          { diksha_guru: { contains: query, mode: 'insensitive' } },
-        ],
-      });
+      // Check if global query has commas (multiple IDs or search terms)
+      if (query.includes(',') || query.includes('，') || query.includes('、')) {
+        const queryTokens = query
+          .split(/[,，、]+/)
+          .map((s) => s.trim())
+          .filter((s) => s.length > 0);
+
+        if (queryTokens.length > 1) {
+          conditions.push({
+            OR: queryTokens.flatMap((token) => [
+              { unique_id: { contains: token, mode: 'insensitive' as const } },
+              { name: { contains: token, mode: 'insensitive' as const } },
+              { diksha_guru: { contains: token, mode: 'insensitive' as const } },
+              { diksha_venue: { contains: token, mode: 'insensitive' as const } },
+            ]),
+          });
+        }
+      } else {
+        conditions.push({
+          OR: [
+            { unique_id: { contains: query, mode: 'insensitive' } },
+            { name: { contains: query, mode: 'insensitive' } },
+            { father_or_spouse_name: { contains: query, mode: 'insensitive' } },
+            { age: { contains: query, mode: 'insensitive' } },
+            { address: { contains: query, mode: 'insensitive' } },
+            { mobile_number: { contains: query, mode: 'insensitive' } },
+            { occupation: { contains: query, mode: 'insensitive' } },
+            { education: { contains: query, mode: 'insensitive' } },
+            { diksha_date: { contains: query, mode: 'insensitive' } },
+            { diksha_guru: { contains: query, mode: 'insensitive' } },
+            { diksha_venue: { contains: query, mode: 'insensitive' } },
+            { diksha_ceremony_serial: { contains: query, mode: 'insensitive' } },
+          ],
+        });
+      }
     }
 
-    if (unique_id) conditions.push({ unique_id: { contains: unique_id, mode: 'insensitive' } });
+    // Support comma-separated Unique IDs / Initiation Numbers
+    if (unique_id) {
+      const idTokens = unique_id
+        .split(/[,，、]+/)
+        .map((s) => s.trim())
+        .filter((s) => s.length > 0);
+
+      if (idTokens.length > 1) {
+        conditions.push({
+          OR: idTokens.map((token) => ({
+            unique_id: { contains: token, mode: 'insensitive' as const },
+          })),
+        });
+      } else if (idTokens.length === 1) {
+        conditions.push({ unique_id: { contains: idTokens[0], mode: 'insensitive' } });
+      }
+    }
+
     if (name) conditions.push({ name: { contains: name, mode: 'insensitive' } });
     if (father_or_spouse_name) conditions.push({ father_or_spouse_name: { contains: father_or_spouse_name, mode: 'insensitive' } });
     if (age) conditions.push({ age: { contains: age, mode: 'insensitive' } });
@@ -82,6 +124,8 @@ export async function GET(request: NextRequest) {
     if (education) conditions.push({ education: { contains: education, mode: 'insensitive' } });
     if (diksha_date) conditions.push({ diksha_date: { contains: diksha_date, mode: 'insensitive' } });
     if (diksha_guru) conditions.push({ diksha_guru: { contains: diksha_guru, mode: 'insensitive' } });
+    if (diksha_venue) conditions.push({ diksha_venue: { contains: diksha_venue, mode: 'insensitive' } });
+    if (diksha_ceremony_serial) conditions.push({ diksha_ceremony_serial: { contains: diksha_ceremony_serial, mode: 'insensitive' } });
 
     const whereClause: Prisma.PersonWhereInput =
       conditions.length === 0
@@ -132,7 +176,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { unique_id, name, father_or_spouse_name, age, address, mobile_number, occupation, education, diksha_date, diksha_guru } = parseResult.data;
+    const {
+      unique_id,
+      name,
+      father_or_spouse_name,
+      age,
+      address,
+      mobile_number,
+      occupation,
+      education,
+      diksha_date,
+      diksha_guru,
+      diksha_venue,
+      diksha_ceremony_serial,
+    } = parseResult.data;
 
     // Check if unique_id already exists
     const existing = await prisma.person.findUnique({
@@ -158,6 +215,8 @@ export async function POST(request: NextRequest) {
         education: education || null,
         diksha_date: diksha_date || null,
         diksha_guru: diksha_guru || null,
+        diksha_venue: diksha_venue || null,
+        diksha_ceremony_serial: diksha_ceremony_serial || null,
       },
     });
 

@@ -55,6 +55,8 @@ export async function POST(request: NextRequest) {
             education: rec.education || null,
             diksha_date: rec.diksha_date || null,
             diksha_guru: rec.diksha_guru || null,
+            diksha_venue: rec.diksha_venue || null,
+            diksha_ceremony_serial: rec.diksha_ceremony_serial || null,
           },
         });
         count++;

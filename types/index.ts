@@ -10,6 +10,8 @@ export interface PersonRecord {
   education?: string | null;
   diksha_date?: string | null;
   diksha_guru?: string | null;
+  diksha_venue?: string | null;
+  diksha_ceremony_serial?: string | null;
   created_at: string | Date;
   updated_at: string | Date;
 }
@@ -28,6 +30,8 @@ export interface ParsedRecord {
   education?: string | null;
   diksha_date?: string | null;
   diksha_guru?: string | null;
+  diksha_venue?: string | null;
+  diksha_ceremony_serial?: string | null;
   status: ParseStatus;
   errorMessage?: string;
   selected?: boolean;
@@ -53,6 +57,8 @@ export interface PersonFilterOptions {
   education?: string;
   diksha_date?: string;
   diksha_guru?: string;
+  diksha_venue?: string;
+  diksha_ceremony_serial?: string;
 }
 
 export interface SearchQueryOptions extends PersonFilterOptions {
@@ -67,4 +73,3 @@ export interface PaginatedResult<T> {
   totalPages: number;
   limit: number;
 }
-
