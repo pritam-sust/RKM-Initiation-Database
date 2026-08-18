@@ -1,35 +1,35 @@
 'use client';
 
 import AdminNavbar from '@/components/admin/AdminNavbar';
-import DeleteConfirmModal from '@/components/admin/DeleteConfirmModal';
 import BulkDeleteConfirmModal from '@/components/admin/BulkDeleteConfirmModal';
+import DeleteConfirmModal from '@/components/admin/DeleteConfirmModal';
 import PersonFormModal from '@/components/admin/PersonFormModal';
 import { useLanguage } from '@/components/LanguageProvider';
-import PersonDetailModal from '@/components/PersonDetailModal';
 import Pagination from '@/components/Pagination';
-import { PersonRecord, PersonFilterOptions } from '@/types';
+import PersonDetailModal from '@/components/PersonDetailModal';
+import { PersonFilterOptions, PersonRecord } from '@/types';
 import {
-  Edit3,
-  Eye,
-  Plus,
-  Search,
-  Trash2,
-  Users,
-  SlidersHorizontal,
-  RotateCcw,
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
+  Award,
+  Calendar,
+  CheckSquare,
   ChevronDown,
   ChevronUp,
-  Calendar,
-  Award,
-  Phone,
-  ArrowUp,
-  ArrowDown,
-  ArrowUpDown,
-  CheckSquare,
-  Square,
-  MinusSquare,
-  X,
   Clock,
+  Edit3,
+  Eye,
+  MinusSquare,
+  Phone,
+  Plus,
+  RotateCcw,
+  Search,
+  SlidersHorizontal,
+  Square,
+  Trash2,
+  Users,
+  X,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
@@ -259,7 +259,7 @@ export default function AdminDashboardPage() {
               />
               <button
                 type="button"
-                className={`btn btn-sm d-flex align-items-center gap-1.5 px-3 py-2 rounded-3 border transition-all ${
+                className={`btn btn-sm d-flex align-items-center gap-1 px-3 py-2 rounded-3 border transition-all ${
                   showAdvanced || activeFilterCount > 0
                     ? 'btn-light border-secondary text-dark fw-bold'
                     : 'btn-light border-slate-200 text-secondary'
@@ -458,7 +458,7 @@ export default function AdminDashboardPage() {
 
               <button
                 type="button"
-                className="btn btn-sm btn-danger d-flex align-items-center gap-1.5 px-3.5 py-1.5 fw-bold shadow-sm"
+                className="btn btn-sm btn-danger d-flex align-items-center gap-1 px-3.5 py-1.5 fw-bold shadow-sm"
                 onClick={() => setIsBulkDeleteModalOpen(true)}
               >
                 <Trash2 size={15} />
@@ -486,7 +486,7 @@ export default function AdminDashboardPage() {
               {selectedIds.size > 0 && (
                 <button
                   type="button"
-                  className="btn btn-sm btn-outline-danger d-flex align-items-center gap-1.5 px-3 py-1.5 fw-semibold"
+                  className="btn btn-sm btn-outline-danger d-flex align-items-center gap-1 px-3 py-1.5 fw-semibold"
                   onClick={() => setIsBulkDeleteModalOpen(true)}
                 >
                   <Trash2 size={14} />
@@ -542,7 +542,7 @@ export default function AdminDashboardPage() {
                       </button>
                     </th>
 
-                    {/* Sortable Unique ID */}
+                    {/* Sortable Initiation Number */}
                     <th
                       style={{ width: '130px' }}
                       className={`th-sortable ${sortBy === 'unique_id' ? 'active text-primary' : ''}`}
@@ -719,7 +719,7 @@ export default function AdminDashboardPage() {
                         </td>
                         {/* Entry Date */}
                         <td>
-                          <div className="d-flex align-items-center gap-1.5 text-secondary small font-mono" title={p.created_at ? new Date(p.created_at).toLocaleString() : ''}>
+                          <div className="d-flex align-items-center gap-1 text-secondary small font-mono" title={p.created_at ? new Date(p.created_at).toLocaleString() : ''}>
                             <Clock size={12} className="text-muted flex-shrink-0" />
                             <span>{formattedEntryDate}</span>
                           </div>

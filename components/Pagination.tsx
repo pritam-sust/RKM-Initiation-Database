@@ -1,8 +1,8 @@
 'use client';
 
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import React, { useState } from 'react';
 import { useLanguage } from './LanguageProvider';
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 
 interface PaginationProps {
   currentPage: number;
@@ -80,7 +80,7 @@ export default function Pagination({
         </span>
 
         {onLimitChange && (
-          <div className="d-flex align-items-center gap-1.5 ms-sm-2">
+          <div className="d-flex align-items-center gap-1 ms-sm-2">
             <span className="extra-small text-muted" style={{ fontSize: '0.75rem' }}>
               {t('perPage')}:
             </span>

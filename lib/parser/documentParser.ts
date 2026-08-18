@@ -1,6 +1,6 @@
-import { ParsedRecord, ParseSummary } from '@/types';
 import { prisma } from '@/lib/db';
-import { isBijoyText, convertBijoyToUnicode } from './bijoyToUnicode';
+import { ParsedRecord, ParseSummary } from '@/types';
+import { convertBijoyToUnicode, isBijoyText } from './bijoyToUnicode';
 
 export interface RawParsedPerson {
   unique_id: string;
@@ -16,7 +16,7 @@ export interface RawParsedPerson {
 }
 
 /**
- * Checks if a token looks like a Unique ID.
+ * Checks if a token looks like a Initiation Number.
  * Examples:
  *  - Bengali Unicode: সিএ১২৩৪৫৬, সিএ১২৩৫, ডিএ২০৬৪, ডিএ-৬১৪০, ডিএ2064
  *  - Bijoy ANSI: wWG2064, wWG2065
@@ -52,7 +52,7 @@ export function isUniqueIdToken(token: string): boolean {
 }
 
 /**
- * Parses a single line starting with a Unique ID or labeled with 'দীক্ষার নম্বর', 'ইউনিক আইডি', etc.
+ * Parses a single line starting with a Initiation Number or labeled with 'দীক্ষার নম্বর', 'ইউনিক আইডি', etc.
  */
 export function parseUniqueIdLine(line: string): { unique_id: string; restOfLine: string } | null {
   const trimmed = line.trim();
@@ -92,7 +92,7 @@ export function parseUniqueIdLine(line: string): { unique_id: string; restOfLine
 /**
  * Preprocesses document text:
  * 1. Converts Bijoy ANSI text to Unicode Bengali if Bijoy formatting is detected.
- * 2. Inserts newlines before inline Unique ID patterns so multiple records on a single line are split cleanly.
+ * 2. Inserts newlines before inline Initiation Number patterns so multiple records on a single line are split cleanly.
  */
 export function preprocessText(rawText: string): string {
   let text = rawText || '';
@@ -102,7 +102,7 @@ export function preprocessText(rawText: string): string {
     text = convertBijoyToUnicode(text);
   }
 
-  // Regex matching Unique IDs or labeled Initiation Numbers anywhere in text
+  // Regex matching Initiation Numbers or labeled Initiation Numbers anywhere in text
   const uniqueIdRegex = /(?:^|\s)(?:(?:দীক্ষার\s*নম্বর|দীক্ষা\s*নম্বর|দীক্ষার\s*নং|দীক্ষা\s*নং|ডিএ|সিএ|ডি-এ|wWG|DA|CA|ID|RKM|[A-Z]{2,6})[\s:/\._-]?[0-9\u09E6-\u09EF]{2,10})/gi;
 
   const lines = text.split(/\r?\n/);
@@ -135,7 +135,7 @@ export function preprocessText(rawText: string): string {
 
 /**
  * Main Document Parser Engine.
- * Converts raw document text into structured records with Unique ID, Name, and multiline Address.
+ * Converts raw document text into structured records with Initiation Number, Name, and multiline Address.
  */
 export function parseDocumentText(rawText: string): RawParsedPerson[] {
   const cleanedText = preprocessText(rawText);
@@ -274,16 +274,16 @@ export async function validateAndStatusRecords(
 
     if (!rec.unique_id || rec.unique_id === 'N/A') {
       status = 'invalid';
-      errorMessage = 'Missing Unique ID';
+      errorMessage = 'Missing Initiation Number';
     } else if (!rec.name || rec.name === 'N/A') {
       status = 'invalid';
       errorMessage = 'Missing Name';
     } else if (existingSet.has(rec.unique_id)) {
       status = 'duplicate';
-      errorMessage = 'Unique ID already exists in database';
+      errorMessage = 'Initiation Number already exists in database';
     } else if (seenInBatch.has(rec.unique_id)) {
       status = 'duplicate';
-      errorMessage = 'Duplicate Unique ID in this upload batch';
+      errorMessage = 'Duplicate Initiation Number in this upload batch';
     }
 
     if (status === 'valid') {

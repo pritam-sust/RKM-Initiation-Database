@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
 import { getAdminSession } from '@/lib/auth';
+import { prisma } from '@/lib/db';
 import { personSchema } from '@/lib/validators';
+import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(
   request: NextRequest,
@@ -64,7 +64,7 @@ export async function PUT(
 
     if (existing) {
       return NextResponse.json(
-        { error: `Unique ID "${unique_id}" is already used by another record.` },
+        { error: `Initiation Number "${unique_id}" is already used by another record.` },
         { status: 409 }
       );
     }

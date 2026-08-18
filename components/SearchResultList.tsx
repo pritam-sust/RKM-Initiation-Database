@@ -1,8 +1,7 @@
 'use client';
 
-import React from 'react';
 import { PersonRecord } from '@/types';
-import { AlertCircle, Calendar, ArrowRight, MapPin, Phone, Award, User, SearchX, RotateCcw, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { AlertCircle, ArrowDown, ArrowRight, ArrowUp, Award, Calendar, CheckCircle, RotateCcw, SearchX, Sparkles, User } from 'lucide-react';
 import { useLanguage } from './LanguageProvider';
 import Pagination from './Pagination';
 
@@ -69,11 +68,10 @@ export default function SearchResultList({
                   </div>
                   <h5 className="placeholder col-8 bg-secondary bg-opacity-25 mb-1.5 rounded py-2"></h5>
                   <p className="placeholder col-6 bg-light mb-2.5 rounded"></p>
-                  <div className="d-flex gap-1.5 mb-2.5">
+                  <div className="d-flex gap-1 mb-2.5">
                     <span className="placeholder col-4 rounded py-1 bg-light"></span>
                     <span className="placeholder col-4 rounded py-1 bg-light"></span>
                   </div>
-                  <p className="placeholder col-11 bg-light mb-0 rounded"></p>
                 </div>
                 <div className="persona-card-footer">
                   <span className="placeholder col-3 bg-light"></span>
@@ -188,16 +186,16 @@ export default function SearchResultList({
             </button>
           </div>
 
-          <div className="d-flex align-items-center gap-1.5 ps-2 border-start border-slate-200">
+          <div className="d-flex align-items-center gap-1 ps-2 border-start border-slate-200">
             <span className="live-status-dot"></span>
             <span className="extra-small fw-semibold text-secondary d-none d-lg-inline" style={{ fontSize: '0.75rem' }}>
-              Live Directory
+              Live Archive
             </span>
           </div>
         </div>
       </div>
 
-      {/* 3-Column Structured Grid */}
+      {/* 3-Column Structured Public Grid */}
       <div className="row g-3.5 mb-4">
         {results.map((person) => (
           <div key={person.id} className="col-12 col-md-6 col-lg-4">
@@ -206,78 +204,65 @@ export default function SearchResultList({
               onClick={() => onSelectPerson(person)}
             >
               <div className="persona-card-accent-bar"></div>
-              
+
               <div className="persona-card-body">
-                {/* 1. Header Slot: ID & Diksha Date */}
+                {/* 1. Header Slot: Initiation Number & Diksha Date */}
                 <div className="slot-header">
-                  <span className="badge-unique-id">
+                  <span className="badge-unique-id" title={t('uniqueId')}>
                     {person.unique_id}
                   </span>
                   {person.diksha_date ? (
-                    <span className="chip-tag chip-orange">
+                    <span className="chip-tag chip-orange" title={t('dikshaDate')}>
                       <Calendar size={11} />
                       <span>{person.diksha_date}</span>
                     </span>
                   ) : (
                     <span className="chip-tag chip-slate" style={{ opacity: 0.75 }}>
                       <Calendar size={11} />
-                      <span>{language === 'bn' ? 'তারিখ: —' : 'Date: —'}</span>
+                      <span>{language === 'bn' ? 'দীক্ষার তারিখ: —' : 'Date: —'}</span>
                     </span>
                   )}
                 </div>
 
                 {/* 2. Devotee Name Slot */}
-                <h3 className="slot-name" title={person.name}>
+                <h3 className="slot-name mt-1" title={person.name}>
                   {person.name}
                 </h3>
 
-                {/* 3. Father / Spouse Relation Slot */}
-                <div className="slot-relation" title={person.father_or_spouse_name || ''}>
-                  {person.father_or_spouse_name ? (
-                    <span>
-                      <span className="text-secondary">{t('fatherOrSpouseName')}:</span>{' '}
-                      <span className="text-dark fw-medium">{person.father_or_spouse_name}</span>
-                    </span>
-                  ) : (
-                    <span className="text-muted" style={{ opacity: 0.6 }}>—</span>
-                  )}
-                </div>
-
-                {/* 4. Attributes Slot: Guru & Mobile */}
-                <div className="slot-attributes">
-                  {person.diksha_guru && (
-                    <span className="chip-tag chip-maroon text-truncate" style={{ maxWidth: '140px' }} title={person.diksha_guru}>
-                      <Award size={11} className="flex-shrink-0" />
-                      <span className="text-truncate">{person.diksha_guru}</span>
-                    </span>
-                  )}
-                  {person.mobile_number && (
-                    <span className="chip-tag chip-green font-mono" title={person.mobile_number}>
-                      <Phone size={10} className="flex-shrink-0" />
-                      <span>{person.mobile_number}</span>
-                    </span>
-                  )}
-                  {!person.diksha_guru && !person.mobile_number && (
-                    <span className="chip-tag chip-slate" style={{ opacity: 0.7 }}>
-                      <User size={10} />
-                      <span>{language === 'bn' ? 'দীক্ষিত সদস্য' : 'Initiated Devotee'}</span>
-                    </span>
-                  )}
-                </div>
-
-                {/* 5. Address Slot: Icon Aligned Directly with First Line */}
-                <div className="slot-address" title={person.address}>
-                  <MapPin size={14} className="slot-address-icon" />
-                  <div className="slot-address-text">
-                    {person.address}
+                {/* 3. Diksha Guru Information */}
+                <div className="mt-2 mb-1">
+                  <div className="extra-small text-muted mb-1" style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    {t('dikshaGuru')}
                   </div>
+                  {person.diksha_guru ? (
+                    <div className="chip-tag chip-maroon d-inline-flex align-items-center gap-1" title={person.diksha_guru}>
+                      <Award size={12} className="flex-shrink-0 text-warning" />
+                      <span className="fw-semibold text-truncate" style={{ maxWidth: '210px' }}>
+                        {person.diksha_guru}
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="chip-tag chip-slate text-muted" style={{ fontSize: '0.75rem' }}>
+                      <User size={11} className="text-secondary" />
+                      <span>{language === 'bn' ? 'দীক্ষাগুরু: উল্লেখ নেই' : 'Diksha Guru: Not specified'}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* 4. Subtle Verification Badge */}
+                <div className="d-flex align-items-center gap-1 mt-2.5 pt-2 border-top border-slate-100">
+                  <CheckCircle size={13} className="text-success flex-shrink-0" />
+                  <span className="extra-small text-secondary fw-medium" style={{ fontSize: '0.725rem' }}>
+                    {language === 'bn' ? 'দীক্ষিত ভক্তের সংরক্ষিত রেকর্ড' : 'Initiated Devotee Record'}
+                  </span>
                 </div>
               </div>
 
-              {/* 6. Card Footer Slot */}
+              {/* 5. Card Footer Slot */}
               <div className="persona-card-footer">
-                <span className="text-secondary extra-small fw-medium text-truncate" style={{ fontSize: '0.75rem', maxWidth: '135px' }}>
-                  {person.occupation || person.education || (language === 'bn' ? 'দীক্ষিত ভক্ত' : 'Devotee')}
+                <span className="chip-tag chip-orange py-0.5 px-2" style={{ fontSize: '0.7rem' }}>
+                  <Sparkles size={10} />
+                  <span>RKM Archive</span>
                 </span>
                 <button
                   type="button"

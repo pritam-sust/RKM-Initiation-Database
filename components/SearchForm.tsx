@@ -1,9 +1,9 @@
 'use client';
 
+import { PersonFilterOptions } from '@/types';
+import { ChevronDown, ChevronUp, RotateCcw, Search, SlidersHorizontal, X } from 'lucide-react';
 import React, { useState } from 'react';
 import { useLanguage } from './LanguageProvider';
-import { Search, X, SlidersHorizontal, ChevronDown, ChevronUp, RotateCcw } from 'lucide-react';
-import { PersonFilterOptions } from '@/types';
 
 interface SearchFormProps {
   initialFilters: PersonFilterOptions;
@@ -16,20 +16,14 @@ export default function SearchForm({ initialFilters, onSearch, isLoading }: Sear
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [filters, setFilters] = useState<PersonFilterOptions>(initialFilters);
 
-  const specificFilterKeys: (keyof PersonFilterOptions)[] = [
+  const publicFilterKeys: (keyof PersonFilterOptions)[] = [
     'unique_id',
     'name',
-    'father_or_spouse_name',
-    'age',
-    'address',
-    'mobile_number',
-    'occupation',
-    'education',
     'diksha_date',
     'diksha_guru',
   ];
 
-  const activeFilterCount = specificFilterKeys.reduce((acc, key) => {
+  const activeFilterCount = publicFilterKeys.reduce((acc, key) => {
     return filters[key] && filters[key]?.trim() ? acc + 1 : acc;
   }, 0);
 
@@ -96,7 +90,7 @@ export default function SearchForm({ initialFilters, onSearch, isLoading }: Sear
         {/* Filter Drawer Toggle */}
         <button
           type="button"
-          className={`btn btn-sm d-flex align-items-center gap-1.5 px-3 py-2 rounded-3 border transition-all ${
+          className={`btn btn-sm d-flex align-items-center gap-1 px-3 py-2 rounded-3 border transition-all ${
             showAdvanced || activeFilterCount > 0
               ? 'btn-light border-secondary text-dark fw-bold'
               : 'btn-light border-slate-200 text-secondary'
@@ -160,7 +154,7 @@ export default function SearchForm({ initialFilters, onSearch, isLoading }: Sear
           </div>
 
           <div className="row g-3">
-            <div className="col-12 col-sm-6 col-lg-4">
+            <div className="col-12 col-sm-6 col-lg-3">
               <label className="form-label-custom">{t('uniqueId')}</label>
               <input
                 type="text"
@@ -171,7 +165,7 @@ export default function SearchForm({ initialFilters, onSearch, isLoading }: Sear
               />
             </div>
 
-            <div className="col-12 col-sm-6 col-lg-4">
+            <div className="col-12 col-sm-6 col-lg-3">
               <label className="form-label-custom">{t('name')}</label>
               <input
                 type="text"
@@ -179,39 +173,6 @@ export default function SearchForm({ initialFilters, onSearch, isLoading }: Sear
                 placeholder={t('name')}
                 value={filters.name || ''}
                 onChange={(e) => handleFieldChange('name', e.target.value)}
-              />
-            </div>
-
-            <div className="col-12 col-sm-6 col-lg-4">
-              <label className="form-label-custom">{t('fatherOrSpouseName')}</label>
-              <input
-                type="text"
-                className="form-control-custom"
-                placeholder={t('fatherOrSpouseName')}
-                value={filters.father_or_spouse_name || ''}
-                onChange={(e) => handleFieldChange('father_or_spouse_name', e.target.value)}
-              />
-            </div>
-
-            <div className="col-12 col-sm-6 col-lg-3">
-              <label className="form-label-custom">{t('age')}</label>
-              <input
-                type="text"
-                className="form-control-custom"
-                placeholder={t('age')}
-                value={filters.age || ''}
-                onChange={(e) => handleFieldChange('age', e.target.value)}
-              />
-            </div>
-
-            <div className="col-12 col-sm-6 col-lg-3">
-              <label className="form-label-custom">{t('mobileNumber')}</label>
-              <input
-                type="text"
-                className="form-control-custom font-mono"
-                placeholder={t('mobileNumber')}
-                value={filters.mobile_number || ''}
-                onChange={(e) => handleFieldChange('mobile_number', e.target.value)}
               />
             </div>
 
@@ -234,39 +195,6 @@ export default function SearchForm({ initialFilters, onSearch, isLoading }: Sear
                 placeholder={t('dikshaDate')}
                 value={filters.diksha_date || ''}
                 onChange={(e) => handleFieldChange('diksha_date', e.target.value)}
-              />
-            </div>
-
-            <div className="col-12 col-sm-6 col-lg-4">
-              <label className="form-label-custom">{t('occupation')}</label>
-              <input
-                type="text"
-                className="form-control-custom"
-                placeholder={t('occupation')}
-                value={filters.occupation || ''}
-                onChange={(e) => handleFieldChange('occupation', e.target.value)}
-              />
-            </div>
-
-            <div className="col-12 col-sm-6 col-lg-4">
-              <label className="form-label-custom">{t('education')}</label>
-              <input
-                type="text"
-                className="form-control-custom"
-                placeholder={t('education')}
-                value={filters.education || ''}
-                onChange={(e) => handleFieldChange('education', e.target.value)}
-              />
-            </div>
-
-            <div className="col-12 col-sm-6 col-lg-4">
-              <label className="form-label-custom">{t('address')}</label>
-              <input
-                type="text"
-                className="form-control-custom"
-                placeholder={t('address')}
-                value={filters.address || ''}
-                onChange={(e) => handleFieldChange('address', e.target.value)}
               />
             </div>
           </div>

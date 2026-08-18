@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/components/LanguageProvider';
-import { Shield, Key, User, AlertCircle, LogIn } from 'lucide-react';
+import { AlertCircle, Key, LogIn, Shield, User } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import React, { useState } from 'react';
 
 export default function AdminLoginPage() {
   const { t } = useLanguage();
@@ -115,11 +115,11 @@ export default function AdminLoginPage() {
           </form>
         </div>
 
-        <div className="p-3 bg-slate-50 text-center border-top">
+        {/* <div className="p-3 bg-slate-50 text-center border-top">
           <span className="extra-small text-muted" style={{ fontSize: '0.75rem' }}>
             Default credentials: <code className="text-dark bg-white px-1 py-0.5 rounded border">admin</code> / <code className="text-dark bg-white px-1 py-0.5 rounded border">admin123</code>
           </span>
-        </div>
+        </div> */}
       </div>
     </div>
   );

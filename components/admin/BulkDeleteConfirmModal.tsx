@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
 import { PersonRecord } from '@/types';
-import { useLanguage } from '../LanguageProvider';
 import { AlertTriangle, Trash2, X } from 'lucide-react';
+import { useState } from 'react';
+import { useLanguage } from '../LanguageProvider';
 
 interface BulkDeleteConfirmModalProps {
   selectedPersons: PersonRecord[];
@@ -99,7 +99,7 @@ export default function BulkDeleteConfirmModal({
             <div className="extra-small text-muted fw-bold text-uppercase mb-2" style={{ fontSize: '0.6875rem', letterSpacing: '0.04em' }}>
               {t('selectedRecords')} ({selectedPersons.length})
             </div>
-            <div className="d-flex flex-wrap gap-1.5">
+            <div className="d-flex flex-wrap gap-1">
               {selectedPersons.map((person) => (
                 <span key={person.id} className="chip-tag chip-slate font-mono" style={{ fontSize: '0.75rem' }}>
                   <strong className="text-primary me-1">{person.unique_id}</strong>
@@ -127,7 +127,7 @@ export default function BulkDeleteConfirmModal({
             </button>
             <button
               type="button"
-              className="btn btn-sm btn-danger px-4 py-2 fw-semibold d-inline-flex align-items-center gap-1.5 shadow-sm"
+              className="btn btn-sm btn-danger px-4 py-2 fw-semibold d-inline-flex align-items-center gap-1 shadow-sm"
               style={{ backgroundColor: '#dc2626', borderColor: '#dc2626' }}
               onClick={handleConfirmDelete}
               disabled={isDeleting}

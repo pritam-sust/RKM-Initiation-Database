@@ -81,7 +81,7 @@ export default function ImportPreviewTable({
       <div className="p-4">
         {/* Summary Filter Pills */}
         <div className="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4 p-2.5 bg-light rounded-3 border border-slate-200">
-          <div className="d-flex flex-wrap align-items-center gap-1.5">
+          <div className="d-flex flex-wrap align-items-center gap-1">
             <button
               type="button"
               className={`btn btn-sm rounded-pill fw-semibold px-3 ${
@@ -127,7 +127,7 @@ export default function ImportPreviewTable({
 
           <button
             type="button"
-            className="btn btn-sm btn-outline-secondary rounded-pill d-flex align-items-center gap-1.5 fw-semibold px-3"
+            className="btn btn-sm btn-outline-secondary rounded-pill d-flex align-items-center gap-1 fw-semibold px-3"
             onClick={toggleSelectAllValid}
           >
             <CheckSquare size={14} />

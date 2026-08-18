@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { LayoutDashboard, LogOut, Menu, Shield, UploadCloud, X } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { useLanguage } from './LanguageProvider';
 import RkmLogo from './RkmLogo';
-import { Shield, LogOut, LayoutDashboard, UploadCloud, Menu, X } from 'lucide-react';
 
 export default function Header() {
   const { language, setLanguage, t } = useLanguage();
@@ -43,7 +43,7 @@ export default function Header() {
             <div className="d-flex flex-column justify-content-center">
               {/* Institution Eyebrow */}
               <div
-                className="d-flex align-items-center gap-1.5 fw-bold"
+                className="d-flex align-items-center gap-1 fw-bold"
                 style={{
                   fontSize: '0.6875rem',
                   color: '#f59e0b',

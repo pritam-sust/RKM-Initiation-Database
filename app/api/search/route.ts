@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { getAdminSession } from '@/lib/auth';
 import { Prisma } from '@prisma/client';
 
 export async function GET(request: NextRequest) {
   try {
+    const session = await getAdminSession();
+    const isAdmin = !!session;
+
     const { searchParams } = new URL(request.url);
     const query = searchParams.get('q')?.trim() || '';
     const page = Math.max(parseInt(searchParams.get('page') || '1', 10), 1);
@@ -113,14 +117,38 @@ export async function GET(request: NextRequest) {
       prisma.person.count({ where: whereClause }),
     ]);
 
+    // Format sanitized data based on authentication:
+    // Without admin access: users can only view unique_id, name, diksha_date, diksha_guru
+    const formattedData = persons.map((p) => {
+      if (isAdmin) {
+        return p;
+      }
+      return {
+        id: p.id,
+        unique_id: p.unique_id,
+        name: p.name,
+        diksha_date: p.diksha_date,
+        diksha_guru: p.diksha_guru,
+        father_or_spouse_name: null,
+        age: null,
+        address: '',
+        mobile_number: null,
+        occupation: null,
+        education: null,
+        created_at: p.created_at,
+        updated_at: p.updated_at,
+      };
+    });
+
     return NextResponse.json({
-      data: persons,
+      data: formattedData,
       total,
       page,
       totalPages: Math.ceil(total / limit) || 1,
       limit,
       sortBy: sortField,
       sortOrder: sortOrderParam,
+      isAdmin,
     });
   } catch (error) {
     console.error('Search API error:', error);

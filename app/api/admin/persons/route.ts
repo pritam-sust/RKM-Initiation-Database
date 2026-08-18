@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
 import { getAdminSession } from '@/lib/auth';
+import { prisma } from '@/lib/db';
 import { personSchema } from '@/lib/validators';
 import { Prisma } from '@prisma/client';
+import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
   const session = await getAdminSession();
@@ -141,7 +141,7 @@ export async function POST(request: NextRequest) {
 
     if (existing) {
       return NextResponse.json(
-        { error: `Unique ID "${unique_id}" already exists.` },
+        { error: `Initiation Number "${unique_id}" already exists.` },
         { status: 409 }
       );
     }

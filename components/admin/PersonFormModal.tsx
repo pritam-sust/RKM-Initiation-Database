@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
 import { PersonRecord } from '@/types';
+import { AlertCircle, Save, X } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 import { useLanguage } from '../LanguageProvider';
-import { Save, X, AlertCircle } from 'lucide-react';
 
 interface PersonFormModalProps {
   person?: PersonRecord | null;
@@ -145,7 +145,7 @@ export default function PersonFormModal({
             )}
 
             <div className="row g-3">
-              {/* Unique ID */}
+              {/* Initiation Number */}
               <div className="col-12 col-md-4">
                 <label className="form-label-custom">
                   {t('uniqueId')} <span className="text-danger">*</span>

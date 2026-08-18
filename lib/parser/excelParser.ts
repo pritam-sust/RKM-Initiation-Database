@@ -1,6 +1,6 @@
 import * as XLSX from 'xlsx';
-import { parseDocumentText, isUniqueIdToken } from './documentParser';
-import { isBijoyText, convertBijoyToUnicode } from './bijoyToUnicode';
+import { convertBijoyToUnicode, isBijoyText } from './bijoyToUnicode';
+import { parseDocumentText } from './documentParser';
 
 interface ParsedRawPerson {
   unique_id: string;
@@ -201,7 +201,7 @@ function mapHeadersToFields(headers: string[]): ColumnMapping {
     ) {
       map.diksha_guru = idx;
     }
-    // 3. Unique ID / Initiation Number
+    // 3. Initiation Number / Initiation Number
     else if (
       map.unique_id === -1 &&
       (header.includes('দীক্ষার নম্বর') ||

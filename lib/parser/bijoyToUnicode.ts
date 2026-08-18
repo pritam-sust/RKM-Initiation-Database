@@ -4,7 +4,7 @@
 
 // Map of Bijoy conjuncts and special characters to Unicode
 const BIJOY_REPLACEMENTS: Array<[RegExp, string]> = [
-  // Unique ID prefix replacements
+  // Initiation Number prefix replacements
   [/wWG/g, 'ডিএ'],
 
   // Special Conjuncts

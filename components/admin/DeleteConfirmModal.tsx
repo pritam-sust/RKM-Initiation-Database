@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
 import { PersonRecord } from '@/types';
+import { AlertTriangle, Trash2 } from 'lucide-react';
+import { useState } from 'react';
 import { useLanguage } from '../LanguageProvider';
-import { Trash2, AlertTriangle, X } from 'lucide-react';
 
 interface DeleteConfirmModalProps {
   person: PersonRecord | null;
@@ -79,7 +79,7 @@ export default function DeleteConfirmModal({
             </button>
             <button
               type="button"
-              className="btn btn-sm btn-danger px-4 fw-semibold d-flex align-items-center gap-1.5 shadow-sm rounded-3"
+              className="btn btn-sm btn-danger px-4 fw-semibold d-flex align-items-center gap-1 shadow-sm rounded-3"
               onClick={handleDelete}
               disabled={isLoading}
             >

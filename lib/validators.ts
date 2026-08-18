@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const personSchema = z.object({
-  unique_id: z.string().trim().min(1, 'Unique ID is required'),
+  unique_id: z.string().trim().min(1, 'Initiation Number is required'),
   name: z.string().trim().min(1, 'Name is required'),
   father_or_spouse_name: z.string().trim().optional().nullable(),
   age: z.string().trim().optional().nullable(),

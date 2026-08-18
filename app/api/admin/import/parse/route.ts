@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
 import { getAdminSession } from '@/lib/auth';
-import { parseDocxBuffer } from '@/lib/parser/docxParser';
 import { parseDocBuffer } from '@/lib/parser/docParser';
-import { parsePdfBuffer } from '@/lib/parser/pdfParser';
+import { RawParsedPerson, validateAndStatusRecords } from '@/lib/parser/documentParser';
+import { parseDocxBuffer } from '@/lib/parser/docxParser';
 import { parseExcelBuffer } from '@/lib/parser/excelParser';
-import { validateAndStatusRecords, RawParsedPerson } from '@/lib/parser/documentParser';
+import { parsePdfBuffer } from '@/lib/parser/pdfParser';
+import { NextRequest, NextResponse } from 'next/server';
 
 const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25 MB
 
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
         duplicateCount: 0,
         invalidCount: 0,
         records: [],
-        message: 'No records matching Unique ID pattern or valid tabular headers found in document.',
+        message: 'No records matching Initiation Number pattern or valid tabular headers found in document.',
       });
     }
 
