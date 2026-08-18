@@ -1,4 +1,5 @@
 import { getAdminSession } from '@/lib/auth';
+import { normalizeDateToSortable } from '@/lib/dateUtils';
 import { prisma } from '@/lib/db';
 import { personSchema } from '@/lib/validators';
 import { NextRequest, NextResponse } from 'next/server';
@@ -69,18 +70,22 @@ export async function PUT(
       );
     }
 
+    const cleanAge = age ? age.replace(/[$৳₹€£¥]/g, '').replace(/\.00$/, '').trim() : null;
+    const sortableDate = normalizeDateToSortable(diksha_date);
+
     const updated = await prisma.person.update({
       where: { id },
       data: {
         unique_id,
         name,
         father_or_spouse_name: father_or_spouse_name || null,
-        age: age || null,
+        age: cleanAge || null,
         address,
         mobile_number: mobile_number || null,
         occupation: occupation || null,
         education: education || null,
         diksha_date: diksha_date || null,
+        diksha_date_sort: sortableDate,
         diksha_guru: diksha_guru || null,
         diksha_venue: diksha_venue || null,
         diksha_ceremony_serial: diksha_ceremony_serial || null,

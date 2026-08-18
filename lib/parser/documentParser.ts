@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/db';
 import { ParsedRecord, ParseSummary } from '@/types';
 import { convertBijoyToUnicode, isBijoyText } from './bijoyToUnicode';
+import { normalizeDateToSortable } from '@/lib/dateUtils';
 
 export interface RawParsedPerson {
   unique_id: string;
@@ -297,17 +298,21 @@ export async function validateAndStatusRecords(
       invalidCount++;
     }
 
+    // Clean age of currency signs or formatting
+    const rawAge = rec.age ? rec.age.replace(/[$৳₹€£¥]/g, '').replace(/\.00$/, '').trim() : null;
+
     records.push({
       tempId: `parsed_${idx}_${Date.now()}`,
       unique_id: rec.unique_id,
       name: rec.name,
       father_or_spouse_name: rec.father_or_spouse_name || null,
-      age: rec.age || null,
+      age: rawAge || null,
       address: rec.address,
       mobile_number: rec.mobile_number || null,
       occupation: rec.occupation || null,
       education: rec.education || null,
       diksha_date: rec.diksha_date || null,
+      diksha_date_sort: normalizeDateToSortable(rec.diksha_date),
       diksha_guru: rec.diksha_guru || null,
       diksha_venue: rec.diksha_venue || null,
       diksha_ceremony_serial: rec.diksha_ceremony_serial || null,

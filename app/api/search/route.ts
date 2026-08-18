@@ -1,4 +1,5 @@
 import { getAdminSession } from '@/lib/auth';
+import { getDateSearchVariants } from '@/lib/dateUtils';
 import { prisma } from '@/lib/db';
 import { Prisma } from '@prisma/client';
 import { NextRequest, NextResponse } from 'next/server';
@@ -18,25 +19,35 @@ export async function GET(request: NextRequest) {
     const sortByParam = searchParams.get('sortBy')?.trim();
     const sortOrderParam = searchParams.get('sortOrder')?.toLowerCase() === 'desc' ? 'desc' : 'asc';
 
-    // Map allowed sort fields to Prisma Person schema fields
-    const sortFieldMap: Record<string, keyof Prisma.PersonOrderByWithRelationInput> = {
-      name: 'name',
-      diksha_guru: 'diksha_guru',
-      diksha_date: 'diksha_date',
-      diksha_venue: 'diksha_venue',
-      diksha_ceremony_serial: 'diksha_ceremony_serial',
-      unique_id: 'unique_id',
-      created_at: 'created_at',
-      updated_at: 'updated_at',
-      father_or_spouse_name: 'father_or_spouse_name',
-      age: 'age',
-      mobile_number: 'mobile_number',
-    };
+    let orderBy: Prisma.PersonOrderByWithRelationInput | Prisma.PersonOrderByWithRelationInput[];
 
-    const sortField = sortByParam && sortFieldMap[sortByParam] ? sortFieldMap[sortByParam] : 'name';
-    const orderBy: Prisma.PersonOrderByWithRelationInput = {
-      [sortField]: sortOrderParam,
-    };
+    if (sortByParam === 'diksha_date') {
+      // True chronological sorting using normalized ISO date column (nulls placed at end)
+      orderBy = {
+        diksha_date_sort: {
+          sort: sortOrderParam,
+          nulls: 'last',
+        },
+      };
+    } else {
+      const sortFieldMap: Record<string, keyof Prisma.PersonOrderByWithRelationInput> = {
+        name: 'name',
+        diksha_guru: 'diksha_guru',
+        diksha_venue: 'diksha_venue',
+        diksha_ceremony_serial: 'diksha_ceremony_serial',
+        unique_id: 'unique_id',
+        created_at: 'created_at',
+        updated_at: 'updated_at',
+        father_or_spouse_name: 'father_or_spouse_name',
+        age: 'age',
+        mobile_number: 'mobile_number',
+      };
+
+      const sortField = sortByParam && sortFieldMap[sortByParam] ? sortFieldMap[sortByParam] : 'name';
+      orderBy = {
+        [sortField]: sortOrderParam,
+      };
+    }
 
     // Field-specific filters
     const unique_id = searchParams.get('unique_id')?.trim();
@@ -65,14 +76,20 @@ export async function GET(request: NextRequest) {
 
         if (queryTokens.length > 1) {
           conditions.push({
-            OR: queryTokens.flatMap((token) => [
-              { unique_id: { contains: token, mode: 'insensitive' as const } },
-              { name: { contains: token, mode: 'insensitive' as const } },
-              { diksha_guru: { contains: token, mode: 'insensitive' as const } },
-            ]),
+            OR: queryTokens.flatMap((token) => {
+              const dateVariants = getDateSearchVariants(token);
+              return [
+                { unique_id: { contains: token, mode: 'insensitive' as const } },
+                { name: { contains: token, mode: 'insensitive' as const } },
+                { diksha_guru: { contains: token, mode: 'insensitive' as const } },
+                ...dateVariants.map((dv) => ({ diksha_date: { contains: dv, mode: 'insensitive' as const } })),
+                ...dateVariants.map((dv) => ({ diksha_date_sort: { contains: dv, mode: 'insensitive' as const } })),
+              ];
+            }),
           });
         }
       } else {
+        const dateVariants = getDateSearchVariants(query);
         conditions.push({
           OR: [
             { unique_id: { contains: query, mode: 'insensitive' } },
@@ -87,6 +104,8 @@ export async function GET(request: NextRequest) {
             { diksha_guru: { contains: query, mode: 'insensitive' } },
             { diksha_venue: { contains: query, mode: 'insensitive' } },
             { diksha_ceremony_serial: { contains: query, mode: 'insensitive' } },
+            ...dateVariants.map((dv) => ({ diksha_date: { contains: dv, mode: 'insensitive' as const } })),
+            ...dateVariants.map((dv) => ({ diksha_date_sort: { contains: dv, mode: 'insensitive' as const } })),
           ],
         });
       }
@@ -131,9 +150,18 @@ export async function GET(request: NextRequest) {
     if (education) {
       conditions.push({ education: { contains: education, mode: 'insensitive' } });
     }
+
+    // Bilingual Date Search (supports Bengali digits, English digits, slashes, dashes, years, ISO)
     if (diksha_date) {
-      conditions.push({ diksha_date: { contains: diksha_date, mode: 'insensitive' } });
+      const dateVariants = getDateSearchVariants(diksha_date);
+      conditions.push({
+        OR: [
+          ...dateVariants.map((dv) => ({ diksha_date: { contains: dv, mode: 'insensitive' as const } })),
+          ...dateVariants.map((dv) => ({ diksha_date_sort: { contains: dv, mode: 'insensitive' as const } })),
+        ],
+      });
     }
+
     if (diksha_guru) {
       conditions.push({ diksha_guru: { contains: diksha_guru, mode: 'insensitive' } });
     }
@@ -193,7 +221,7 @@ export async function GET(request: NextRequest) {
       page,
       totalPages: Math.ceil(total / limit) || 1,
       limit,
-      sortBy: sortField,
+      sortBy: sortByParam || 'name',
       sortOrder: sortOrderParam,
       isAdmin,
     });

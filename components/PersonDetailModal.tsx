@@ -6,7 +6,9 @@ import {
   Briefcase,
   Calendar,
   Clock,
+  Compass,
   GraduationCap,
+  Layers,
   Lock,
   MapPin,
   Phone,
@@ -15,10 +17,7 @@ import {
   User,
   Users,
   X,
-  Compass,
-  Layers,
 } from 'lucide-react';
-import React from 'react';
 import { useLanguage } from './LanguageProvider';
 
 interface PersonDetailModalProps {
@@ -120,10 +119,10 @@ export default function PersonDetailModal({ person, onClose }: PersonDetailModal
               <Sparkles size={15} className="text-warning flex-shrink-0" />
               <span>{language === 'bn' ? 'দীক্ষার বিবরণ' : 'Initiation Information'}</span>
             </div>
-            <div className="row g-3.5">
+            <div className="row g-3">
               <div className="col-12 col-md-4">
                 <div className="kv-item">
-                  <span className="kv-label d-flex align-items-center gap-1.5">
+                  <span className="kv-label d-flex align-items-center gap-1">
                     <Tag size={13} className="text-secondary" />
                     {t('uniqueId')}
                   </span>
@@ -132,7 +131,7 @@ export default function PersonDetailModal({ person, onClose }: PersonDetailModal
               </div>
               <div className="col-12 col-md-4">
                 <div className="kv-item">
-                  <span className="kv-label d-flex align-items-center gap-1.5">
+                  <span className="kv-label d-flex align-items-center gap-1">
                     <Calendar size={13} className="text-secondary" />
                     {t('dikshaDate')}
                   </span>
@@ -143,7 +142,7 @@ export default function PersonDetailModal({ person, onClose }: PersonDetailModal
               </div>
               <div className="col-12 col-md-4">
                 <div className="kv-item">
-                  <span className="kv-label d-flex align-items-center gap-1.5">
+                  <span className="kv-label d-flex align-items-center gap-1">
                     <Award size={13} className="text-secondary" />
                     {t('dikshaGuru')}
                   </span>
@@ -159,7 +158,7 @@ export default function PersonDetailModal({ person, onClose }: PersonDetailModal
                   {person.diksha_venue && (
                     <div className="col-12 col-md-6">
                       <div className="kv-item">
-                        <span className="kv-label d-flex align-items-center gap-1.5">
+                        <span className="kv-label d-flex align-items-center gap-1">
                           <Compass size={13} className="text-secondary" />
                           {t('dikshaVenue')}
                         </span>
@@ -170,7 +169,7 @@ export default function PersonDetailModal({ person, onClose }: PersonDetailModal
                   {person.diksha_ceremony_serial && (
                     <div className="col-12 col-md-6">
                       <div className="kv-item">
-                        <span className="kv-label d-flex align-items-center gap-1.5">
+                        <span className="kv-label d-flex align-items-center gap-1">
                           <Layers size={13} className="text-secondary" />
                           {t('dikshaCeremonySerial')}
                         </span>
@@ -192,10 +191,10 @@ export default function PersonDetailModal({ person, onClose }: PersonDetailModal
                   <User size={15} className="text-primary flex-shrink-0" />
                   <span>{language === 'bn' ? 'ব্যক্তিগত ও যোগাযোগের তথ্য' : 'Personal & Contact Information'}</span>
                 </div>
-                <div className="row g-3.5">
+                <div className="row g-3">
                   <div className="col-6 col-md-3">
                     <div className="kv-item">
-                      <span className="kv-label d-flex align-items-center gap-1.5">
+                      <span className="kv-label d-flex align-items-center gap-1">
                         <Users size={13} className="text-secondary" />
                         {t('age')}
                       </span>
@@ -206,7 +205,7 @@ export default function PersonDetailModal({ person, onClose }: PersonDetailModal
                   </div>
                   <div className="col-6 col-md-3">
                     <div className="kv-item">
-                      <span className="kv-label d-flex align-items-center gap-1.5">
+                      <span className="kv-label d-flex align-items-center gap-1">
                         <Phone size={13} className="text-secondary" />
                         {t('mobileNumber')}
                       </span>
@@ -217,7 +216,7 @@ export default function PersonDetailModal({ person, onClose }: PersonDetailModal
                   </div>
                   <div className="col-6 col-md-3">
                     <div className="kv-item">
-                      <span className="kv-label d-flex align-items-center gap-1.5">
+                      <span className="kv-label d-flex align-items-center gap-1">
                         <Briefcase size={13} className="text-secondary" />
                         {t('occupation')}
                       </span>
@@ -228,7 +227,7 @@ export default function PersonDetailModal({ person, onClose }: PersonDetailModal
                   </div>
                   <div className="col-6 col-md-3">
                     <div className="kv-item">
-                      <span className="kv-label d-flex align-items-center gap-1.5">
+                      <span className="kv-label d-flex align-items-center gap-1">
                         <GraduationCap size={13} className="text-secondary" />
                         {t('education')}
                       </span>
@@ -256,7 +255,7 @@ export default function PersonDetailModal({ person, onClose }: PersonDetailModal
               {/* Section 4: System Entry Date */}
               {person.created_at && (
                 <div className="d-flex align-items-center justify-content-between p-2.5 px-3 bg-light rounded-3 text-muted small">
-                  <span className="d-flex align-items-center gap-1.5 extra-small">
+                  <span className="d-flex align-items-center gap-1 extra-small">
                     <Clock size={12} />
                     <span>{t('entryDate')}:</span>
                   </span>
@@ -270,7 +269,7 @@ export default function PersonDetailModal({ person, onClose }: PersonDetailModal
 
           {/* If Public View: Show Privacy Protection Notice */}
           {!hasConfidentialData && (
-            <div className="p-3 bg-slate-50 border border-slate-200 rounded-3 d-flex align-items-start gap-2.5">
+            <div className="p-3 bg-slate-50 border border-slate-200 rounded-3 d-flex align-items-start gap-2">
               <Lock size={16} className="text-secondary mt-0.5 flex-shrink-0" />
               <div className="extra-small text-muted" style={{ fontSize: '0.75rem', lineHeight: '1.5' }}>
                 {language === 'bn'

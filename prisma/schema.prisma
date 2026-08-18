@@ -18,6 +18,7 @@ model Person {
   occupation             String?
   education              String?
   diksha_date            String?  @map("diksha_date")
+  diksha_date_sort       String?  @map("diksha_date_sort")
   diksha_guru            String?  @map("diksha_guru")
   diksha_venue           String?  @map("diksha_venue")
   diksha_ceremony_serial String?  @map("diksha_ceremony_serial")
@@ -26,6 +27,7 @@ model Person {
 
   @@index([unique_id])
   @@index([name])
+  @@index([diksha_date_sort])
   @@map("persons")
 }
 

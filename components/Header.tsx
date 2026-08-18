@@ -85,7 +85,7 @@ export default function Header() {
           </Link>
 
           {/* Desktop Right Navigation */}
-          <div className="d-none d-md-flex align-items-center gap-2.5">
+          <div className="d-none d-md-flex align-items-center gap-2">
             {/* Language Switcher Toggle */}
             <div className="lang-toggle-container" role="group">
               <button

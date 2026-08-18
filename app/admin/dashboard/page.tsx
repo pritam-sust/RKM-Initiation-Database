@@ -266,7 +266,7 @@ export default function AdminDashboardPage() {
               />
               <button
                 type="button"
-                className={`btn btn-sm d-flex align-items-center gap-1.5 px-3 py-2 rounded-3 border transition-all ${
+                className={`btn btn-sm d-flex align-items-center gap-1 px-3 py-2 rounded-3 border transition-all ${
                   showAdvanced || activeFilterCount > 0
                     ? 'btn-light border-secondary text-dark fw-bold'
                     : 'btn-light border-slate-200 text-secondary'
@@ -491,7 +491,7 @@ export default function AdminDashboardPage() {
 
               <button
                 type="button"
-                className="btn btn-sm btn-danger d-flex align-items-center gap-1.5 px-3.5 py-1.5 fw-bold shadow-sm"
+                className="btn btn-sm btn-danger d-flex align-items-center gap-1 px-3.5 py-1.5 fw-bold shadow-sm"
                 onClick={() => setIsBulkDeleteModalOpen(true)}
               >
                 <Trash2 size={15} />
@@ -732,7 +732,7 @@ export default function AdminDashboardPage() {
                         {/* Diksha Venue Cell */}
                         <td>
                           {p.diksha_venue ? (
-                            <div className="d-flex align-items-center gap-1.5 small text-dark fw-medium text-truncate" style={{ maxWidth: '170px' }} title={p.diksha_venue}>
+                            <div className="d-flex align-items-center gap-1 small text-dark fw-medium text-truncate" style={{ maxWidth: '170px' }} title={p.diksha_venue}>
                               <Compass size={13} className="text-primary flex-shrink-0" />
                               <span className="text-truncate">{p.diksha_venue}</span>
                             </div>
@@ -743,7 +743,7 @@ export default function AdminDashboardPage() {
 
                         {/* Entry Date */}
                         <td>
-                          <div className="d-flex align-items-center gap-1.5 text-secondary small font-mono" title={p.created_at ? new Date(p.created_at).toLocaleString() : ''}>
+                          <div className="d-flex align-items-center gap-1 text-secondary small font-mono" title={p.created_at ? new Date(p.created_at).toLocaleString() : ''}>
                             <Clock size={12} className="text-muted flex-shrink-0" />
                             <span>{formattedEntryDate}</span>
                           </div>

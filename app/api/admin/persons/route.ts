@@ -1,4 +1,5 @@
 import { getAdminSession } from '@/lib/auth';
+import { getDateSearchVariants, normalizeDateToSortable } from '@/lib/dateUtils';
 import { prisma } from '@/lib/db';
 import { personSchema } from '@/lib/validators';
 import { Prisma } from '@prisma/client';
@@ -21,27 +22,38 @@ export async function GET(request: NextRequest) {
     const sortByParam = searchParams.get('sortBy')?.trim();
     const sortOrderParam = searchParams.get('sortOrder')?.toLowerCase() === 'asc' ? 'asc' : 'desc';
 
-    const sortFieldMap: Record<string, keyof Prisma.PersonOrderByWithRelationInput> = {
-      name: 'name',
-      diksha_guru: 'diksha_guru',
-      diksha_date: 'diksha_date',
-      diksha_venue: 'diksha_venue',
-      diksha_ceremony_serial: 'diksha_ceremony_serial',
-      unique_id: 'unique_id',
-      created_at: 'created_at',
-      updated_at: 'updated_at',
-      father_or_spouse_name: 'father_or_spouse_name',
-      age: 'age',
-      mobile_number: 'mobile_number',
-      address: 'address',
-      occupation: 'occupation',
-      education: 'education',
-    };
+    let orderBy: Prisma.PersonOrderByWithRelationInput | Prisma.PersonOrderByWithRelationInput[];
 
-    const sortField = sortByParam && sortFieldMap[sortByParam] ? sortFieldMap[sortByParam] : 'created_at';
-    const orderBy: Prisma.PersonOrderByWithRelationInput = {
-      [sortField]: sortOrderParam,
-    };
+    if (sortByParam === 'diksha_date') {
+      // True chronological sorting using normalized ISO date column (nulls placed at end)
+      orderBy = {
+        diksha_date_sort: {
+          sort: sortOrderParam,
+          nulls: 'last',
+        },
+      };
+    } else {
+      const sortFieldMap: Record<string, keyof Prisma.PersonOrderByWithRelationInput> = {
+        name: 'name',
+        diksha_guru: 'diksha_guru',
+        diksha_venue: 'diksha_venue',
+        diksha_ceremony_serial: 'diksha_ceremony_serial',
+        unique_id: 'unique_id',
+        created_at: 'created_at',
+        updated_at: 'updated_at',
+        father_or_spouse_name: 'father_or_spouse_name',
+        age: 'age',
+        mobile_number: 'mobile_number',
+        address: 'address',
+        occupation: 'occupation',
+        education: 'education',
+      };
+
+      const sortField = sortByParam && sortFieldMap[sortByParam] ? sortFieldMap[sortByParam] : 'created_at';
+      orderBy = {
+        [sortField]: sortOrderParam,
+      };
+    }
 
     // Field-specific filters
     const unique_id = searchParams.get('unique_id')?.trim();
@@ -69,15 +81,21 @@ export async function GET(request: NextRequest) {
 
         if (queryTokens.length > 1) {
           conditions.push({
-            OR: queryTokens.flatMap((token) => [
-              { unique_id: { contains: token, mode: 'insensitive' as const } },
-              { name: { contains: token, mode: 'insensitive' as const } },
-              { diksha_guru: { contains: token, mode: 'insensitive' as const } },
-              { diksha_venue: { contains: token, mode: 'insensitive' as const } },
-            ]),
+            OR: queryTokens.flatMap((token) => {
+              const dateVariants = getDateSearchVariants(token);
+              return [
+                { unique_id: { contains: token, mode: 'insensitive' as const } },
+                { name: { contains: token, mode: 'insensitive' as const } },
+                { diksha_guru: { contains: token, mode: 'insensitive' as const } },
+                { diksha_venue: { contains: token, mode: 'insensitive' as const } },
+                ...dateVariants.map((dv) => ({ diksha_date: { contains: dv, mode: 'insensitive' as const } })),
+                ...dateVariants.map((dv) => ({ diksha_date_sort: { contains: dv, mode: 'insensitive' as const } })),
+              ];
+            }),
           });
         }
       } else {
+        const dateVariants = getDateSearchVariants(query);
         conditions.push({
           OR: [
             { unique_id: { contains: query, mode: 'insensitive' } },
@@ -92,6 +110,8 @@ export async function GET(request: NextRequest) {
             { diksha_guru: { contains: query, mode: 'insensitive' } },
             { diksha_venue: { contains: query, mode: 'insensitive' } },
             { diksha_ceremony_serial: { contains: query, mode: 'insensitive' } },
+            ...dateVariants.map((dv) => ({ diksha_date: { contains: dv, mode: 'insensitive' as const } })),
+            ...dateVariants.map((dv) => ({ diksha_date_sort: { contains: dv, mode: 'insensitive' as const } })),
           ],
         });
       }
@@ -122,7 +142,18 @@ export async function GET(request: NextRequest) {
     if (mobile_number) conditions.push({ mobile_number: { contains: mobile_number, mode: 'insensitive' } });
     if (occupation) conditions.push({ occupation: { contains: occupation, mode: 'insensitive' } });
     if (education) conditions.push({ education: { contains: education, mode: 'insensitive' } });
-    if (diksha_date) conditions.push({ diksha_date: { contains: diksha_date, mode: 'insensitive' } });
+
+    // Bilingual Date Search (supports Bengali digits, English digits, slashes, dashes, years, ISO)
+    if (diksha_date) {
+      const dateVariants = getDateSearchVariants(diksha_date);
+      conditions.push({
+        OR: [
+          ...dateVariants.map((dv) => ({ diksha_date: { contains: dv, mode: 'insensitive' as const } })),
+          ...dateVariants.map((dv) => ({ diksha_date_sort: { contains: dv, mode: 'insensitive' as const } })),
+        ],
+      });
+    }
+
     if (diksha_guru) conditions.push({ diksha_guru: { contains: diksha_guru, mode: 'insensitive' } });
     if (diksha_venue) conditions.push({ diksha_venue: { contains: diksha_venue, mode: 'insensitive' } });
     if (diksha_ceremony_serial) conditions.push({ diksha_ceremony_serial: { contains: diksha_ceremony_serial, mode: 'insensitive' } });
@@ -150,7 +181,7 @@ export async function GET(request: NextRequest) {
       page,
       totalPages: Math.ceil(total / limit) || 1,
       limit,
-      sortBy: sortField,
+      sortBy: sortByParam || 'created_at',
       sortOrder: sortOrderParam,
     });
   } catch (error) {
@@ -203,17 +234,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const cleanAge = age ? age.replace(/[$৳₹€£¥]/g, '').replace(/\.00$/, '').trim() : null;
+    const sortableDate = normalizeDateToSortable(diksha_date);
+
     const newPerson = await prisma.person.create({
       data: {
         unique_id,
         name,
         father_or_spouse_name: father_or_spouse_name || null,
-        age: age || null,
+        age: cleanAge || null,
         address,
         mobile_number: mobile_number || null,
         occupation: occupation || null,
         education: education || null,
         diksha_date: diksha_date || null,
+        diksha_date_sort: sortableDate,
         diksha_guru: diksha_guru || null,
         diksha_venue: diksha_venue || null,
         diksha_ceremony_serial: diksha_ceremony_serial || null,

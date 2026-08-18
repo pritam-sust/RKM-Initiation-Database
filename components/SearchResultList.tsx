@@ -1,10 +1,10 @@
 'use client';
 
+import { formatNumber } from '@/lib/formatters';
 import { PersonRecord } from '@/types';
 import { AlertCircle, ArrowDown, ArrowRight, ArrowUp, Award, Calendar, CheckCircle, RotateCcw, SearchX, Sparkles, User } from 'lucide-react';
 import { useLanguage } from './LanguageProvider';
 import Pagination from './Pagination';
-import { formatNumber } from '@/lib/formatters';
 
 interface SearchResultListProps {
   results: PersonRecord[];
@@ -58,7 +58,7 @@ export default function SearchResultList({
           <span className="placeholder col-2 rounded py-2 bg-light"></span>
         </div>
 
-        <div className="row g-3.5">
+        <div className="row g-3">
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <div key={i} className="col-12 col-md-6 col-lg-4">
               <div className="persona-card placeholder-glow">
@@ -150,7 +150,7 @@ export default function SearchResultList({
         </div>
 
         {/* Right: Interactive Sorting & Live Indicator */}
-        <div className="d-flex flex-wrap align-items-center gap-2.5 ms-auto">
+        <div className="d-flex flex-wrap align-items-center gap-2 ms-auto">
           {/* Sorting Controls */}
           <div className="sort-controls-group">
             <span className="extra-small text-muted d-none d-md-inline" style={{ fontSize: '0.75rem' }}>
@@ -197,7 +197,7 @@ export default function SearchResultList({
       </div>
 
       {/* 3-Column Structured Public Grid */}
-      <div className="row g-3.5 mb-4">
+      <div className="row g-3 mb-4">
         {results.map((person) => (
           <div key={person.id} className="col-12 col-md-6 col-lg-4">
             <div

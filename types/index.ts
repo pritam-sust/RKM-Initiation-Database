@@ -9,6 +9,7 @@ export interface PersonRecord {
   occupation?: string | null;
   education?: string | null;
   diksha_date?: string | null;
+  diksha_date_sort?: string | null;
   diksha_guru?: string | null;
   diksha_venue?: string | null;
   diksha_ceremony_serial?: string | null;
@@ -29,6 +30,7 @@ export interface ParsedRecord {
   occupation?: string | null;
   education?: string | null;
   diksha_date?: string | null;
+  diksha_date_sort?: string | null;
   diksha_guru?: string | null;
   diksha_venue?: string | null;
   diksha_ceremony_serial?: string | null;

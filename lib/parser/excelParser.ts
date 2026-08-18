@@ -26,6 +26,27 @@ function cleanCell(val: unknown): string {
   return str;
 }
 
+function cleanAge(val: unknown): string {
+  if (val === null || val === undefined) return '';
+  let str = cleanCell(val);
+  // Strip currency symbols ($, ৳, ₹, €, £, ¥) and currency strings (tk, usd, etc.)
+  str = str.replace(/[$৳₹€£¥]/g, '').replace(/\b(tk|taka|rs|usd)\b/gi, '').trim();
+  // Remove trailing .00 if from excel currency/decimal formatting e.g. 45.00 -> 45
+  str = str.replace(/\.00$/, '').trim();
+  return str;
+}
+
+function cleanDateCell(val: unknown): string {
+  if (val === null || val === undefined) return '';
+  if (val instanceof Date) {
+    const y = val.getFullYear();
+    const m = String(val.getMonth() + 1).padStart(2, '0');
+    const d = String(val.getDate()).padStart(2, '0');
+    return `${d}/${m}/${y}`;
+  }
+  return cleanCell(val);
+}
+
 export function parseExcelBuffer(buffer: Buffer): ParsedRawPerson[] {
   const workbook = XLSX.read(buffer, { type: 'buffer', cellDates: true });
   const sheetNames = workbook.SheetNames;
@@ -71,12 +92,12 @@ export function parseExcelBuffer(buffer: Buffer): ParsedRawPerson[] {
             unique_id: rawId || 'N/A',
             name: rawName || 'N/A',
             father_or_spouse_name: colMap.father !== -1 ? cleanCell(row[colMap.father]) || null : null,
-            age: colMap.age !== -1 ? cleanCell(row[colMap.age]) || null : null,
+            age: colMap.age !== -1 ? cleanAge(row[colMap.age]) || null : null,
             address: rawAddress || 'N/A',
             mobile_number: colMap.mobile !== -1 ? cleanCell(row[colMap.mobile]) || null : null,
             occupation: colMap.occupation !== -1 ? cleanCell(row[colMap.occupation]) || null : null,
             education: colMap.education !== -1 ? cleanCell(row[colMap.education]) || null : null,
-            diksha_date: colMap.diksha_date !== -1 ? cleanCell(row[colMap.diksha_date]) || null : null,
+            diksha_date: colMap.diksha_date !== -1 ? cleanDateCell(row[colMap.diksha_date]) || null : null,
             diksha_guru: colMap.diksha_guru !== -1 ? cleanCell(row[colMap.diksha_guru]) || null : null,
             diksha_venue: colMap.diksha_venue !== -1 ? cleanCell(row[colMap.diksha_venue]) || null : null,
             diksha_ceremony_serial:

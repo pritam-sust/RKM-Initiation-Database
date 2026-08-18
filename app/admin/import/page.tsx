@@ -83,6 +83,7 @@ export default function AdminImportPage() {
           occupation: r.occupation || null,
           education: r.education || null,
           diksha_date: r.diksha_date || null,
+          diksha_date_sort: r.diksha_date_sort || null,
           diksha_guru: r.diksha_guru || null,
           diksha_venue: r.diksha_venue || null,
           diksha_ceremony_serial: r.diksha_ceremony_serial || null,
