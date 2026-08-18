@@ -29,6 +29,7 @@ export const en = {
   adminLogin: 'Admin Login',
   adminDashboard: 'Admin Dashboard',
   importDocuments: 'Import Documents',
+  importPageSubtitle: 'Upload Word (.docx, .doc), Excel (.xlsx, .xls) or PDF (.pdf) documents containing initiated person records.',
   logout: 'Logout',
   totalRecords: 'Total Records',
   addNewPerson: 'Add New Person',

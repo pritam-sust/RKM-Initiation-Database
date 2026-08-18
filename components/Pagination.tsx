@@ -1,5 +1,6 @@
 'use client';
 
+import { formatNumber } from '@/lib/formatters';
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import React, { useState } from 'react';
 import { useLanguage } from './LanguageProvider';
@@ -72,10 +73,10 @@ export default function Pagination({
         <span className="small text-secondary fw-medium">
           {t('showingResults')}{' '}
           <strong className="text-dark font-mono">
-            {startRecord} - {endRecord}
+            {formatNumber(startRecord, language)} - {formatNumber(endRecord, language)}
           </strong>{' '}
           {t('of')}{' '}
-          <strong className="text-dark font-mono">{totalRecords.toLocaleString()}</strong>{' '}
+          <strong className="text-dark font-mono">{formatNumber(totalRecords, language)}</strong>{' '}
           {t('records')}
         </span>
 
@@ -92,7 +93,7 @@ export default function Pagination({
             >
               {limitOptions.map((opt) => (
                 <option key={opt} value={opt}>
-                  {opt}
+                  {formatNumber(opt, language)}
                 </option>
               ))}
             </select>
@@ -136,7 +137,7 @@ export default function Pagination({
                     className={`pagination-btn-pill font-mono ${p === currentPage ? 'active' : ''}`}
                     onClick={() => onPageChange(p)}
                   >
-                    {p}
+                    {formatNumber(p, language)}
                   </button>
                 ) : (
                   <span key={idx} className="px-1 text-muted d-flex align-items-center font-mono">
@@ -148,7 +149,7 @@ export default function Pagination({
 
             {/* Current Page Pill on Mobile */}
             <div className="d-inline-flex d-sm-none align-items-center px-2 py-1 bg-light rounded font-mono text-dark fw-bold" style={{ fontSize: '0.8125rem' }}>
-              {currentPage} / {totalPages}
+              {formatNumber(currentPage, language)} / {formatNumber(totalPages, language)}
             </div>
 
             {/* Next Button */}
@@ -184,10 +185,10 @@ export default function Pagination({
                 type="number"
                 min={1}
                 max={totalPages}
-                placeholder={String(currentPage)}
+                placeholder={formatNumber(currentPage, language)}
                 value={jumpInput}
                 onChange={(e) => setJumpInput(e.target.value)}
-                className="pagination-jump-input"
+                className="pagination-jump-input font-mono"
               />
               <button
                 type="submit"

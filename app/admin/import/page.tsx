@@ -122,7 +122,7 @@ export default function AdminImportPage() {
         <div className="mb-4">
           <h2 className="fw-bold text-dark mb-1">{t('importDocuments')}</h2>
           <p className="text-muted mb-0">
-            Upload Word (.docx, .doc), Excel (.xlsx, .xls) or PDF (.pdf) documents containing initiated person records.
+            {t('importPageSubtitle')}
           </p>
         </div>
 

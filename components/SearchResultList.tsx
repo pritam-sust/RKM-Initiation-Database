@@ -4,6 +4,7 @@ import { PersonRecord } from '@/types';
 import { AlertCircle, ArrowDown, ArrowRight, ArrowUp, Award, Calendar, CheckCircle, RotateCcw, SearchX, Sparkles, User } from 'lucide-react';
 import { useLanguage } from './LanguageProvider';
 import Pagination from './Pagination';
+import { formatNumber } from '@/lib/formatters';
 
 interface SearchResultListProps {
   results: PersonRecord[];
@@ -144,7 +145,7 @@ export default function SearchResultList({
       <div className="results-status-bar">
         {/* Left: Total Records Count */}
         <div className="results-count-pill">
-          <span className="results-count-number">{total.toLocaleString()}</span>
+          <span className="results-count-number">{formatNumber(total, language)}</span>
           <span className="results-count-text">{t('resultsFound')}</span>
         </div>
 

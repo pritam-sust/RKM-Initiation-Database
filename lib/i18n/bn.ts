@@ -29,6 +29,7 @@ export const bn = {
   adminLogin: 'এডমিন লগইন',
   adminDashboard: 'এডমিন ড্যাশবোর্ড',
   importDocuments: 'ডকুমেন্ট ইমপোর্ট',
+  importPageSubtitle: 'দীক্ষিত ভক্তদের তথ্য সম্বলিত ওয়ার্ড (.docx, .doc), এক্সেল (.xlsx, .xls) অথবা পিডিএফ (.pdf) ফাইল আপলোড করুন।',
   logout: 'লগআউট',
   totalRecords: 'মোট রেকর্ড সংখ্যা',
   addNewPerson: 'নতুন তথ্য যোগ করুন',

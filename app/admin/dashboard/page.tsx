@@ -7,6 +7,7 @@ import PersonFormModal from '@/components/admin/PersonFormModal';
 import { useLanguage } from '@/components/LanguageProvider';
 import Pagination from '@/components/Pagination';
 import PersonDetailModal from '@/components/PersonDetailModal';
+import { formatNumber } from '@/lib/formatters';
 import { PersonFilterOptions, PersonRecord } from '@/types';
 import {
   ArrowDown,
@@ -242,7 +243,7 @@ export default function AdminDashboardPage() {
               <div>
                 <span className="form-label-custom mb-1">{t('totalRecords')}</span>
                 <h2 className="display-6 fw-bold text-dark mb-0 tracking-tight font-mono">
-                  {total.toLocaleString()}
+                  {formatNumber(total, language)}
                 </h2>
               </div>
               <div className="stat-icon-wrapper stat-icon-blue">
@@ -277,7 +278,7 @@ export default function AdminDashboardPage() {
                 <span className="d-none d-sm-inline">{t('filters')}</span>
                 {activeFilterCount > 0 && (
                   <span className="badge rounded-pill bg-dark text-white px-2 py-0.5" style={{ fontSize: '0.7rem' }}>
-                    {activeFilterCount}
+                    {formatNumber(activeFilterCount, language)}
                   </span>
                 )}
                 {showAdvanced ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
@@ -305,7 +306,7 @@ export default function AdminDashboardPage() {
                 <span className="fw-bold text-dark fs-6">{t('advancedFilters')}</span>
                 {activeFilterCount > 0 && (
                   <span className="chip-tag chip-orange">
-                    {activeFilterCount} {t('activeFiltersCount')}
+                    {formatNumber(activeFilterCount, language)} {t('activeFiltersCount')}
                   </span>
                 )}
               </div>
@@ -469,11 +470,11 @@ export default function AdminDashboardPage() {
           >
             <div className="d-flex align-items-center gap-3">
               <span className="badge rounded-pill bg-danger px-3 py-1.5 fw-bold font-mono fs-6">
-                {selectedIds.size}
+                {formatNumber(selectedIds.size, language)}
               </span>
               <span className="fw-semibold">
                 {language === 'bn'
-                  ? `${selectedIds.size} টি রেকর্ড নির্বাচন করা হয়েছে`
+                  ? `${formatNumber(selectedIds.size, language)} টি রেকর্ড নির্বাচন করা হয়েছে`
                   : `${selectedIds.size} records selected`}
               </span>
             </div>
@@ -496,7 +497,7 @@ export default function AdminDashboardPage() {
                 <Trash2 size={15} />
                 <span>
                   {language === 'bn'
-                    ? `নির্বাচিত ${selectedIds.size} টি মুছুন`
+                    ? `নির্বাচিত ${formatNumber(selectedIds.size, language)} টি মুছুন`
                     : `Delete Selected (${selectedIds.size})`}
                 </span>
               </button>
@@ -510,7 +511,7 @@ export default function AdminDashboardPage() {
             <div className="d-flex align-items-center gap-3">
               <h5 className="fw-bold text-dark mb-0 fs-6">{t('adminDashboard')}</h5>
               <span className="badge-unique-id" style={{ fontSize: '0.75rem' }}>
-                {total.toLocaleString()} {t('records')}
+                {formatNumber(total, language)} {t('records')}
               </span>
             </div>
 
@@ -518,13 +519,13 @@ export default function AdminDashboardPage() {
               {selectedIds.size > 0 && (
                 <button
                   type="button"
-                  className="btn btn-sm btn-outline-danger d-flex align-items-center gap-1.5 px-3 py-1.5 fw-semibold"
+                  className="btn btn-sm btn-outline-danger d-flex align-items-center gap-1 px-3 py-1.5 fw-semibold"
                   onClick={() => setIsBulkDeleteModalOpen(true)}
                 >
                   <Trash2 size={14} />
                   <span>
                     {language === 'bn'
-                      ? `মুছুন (${selectedIds.size})`
+                      ? `মুছুন (${formatNumber(selectedIds.size, language)})`
                       : `Delete (${selectedIds.size})`}
                   </span>
                 </button>
