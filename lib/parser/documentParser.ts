@@ -36,8 +36,9 @@ export function isUniqueIdToken(token: string): boolean {
   // Pattern 2: Bijoy representation (e.g. wWG2064, wWG2065)
   const bijoyPattern = /^wWG[\s/\._-]?[0-9]{2,10}$/i;
 
-  // Pattern 3: English prefix + digits (e.g. DA6140, DA6141, CA123456, RKM-001)
-  const enPattern = /^[a-zA-Z]{2,8}[\s/\._-]?[0-9]{2,10}$/;
+  // Pattern 3: English uppercase prefix + digits (e.g. DA6140, DA6141, CA123456, RKM-001)
+  // Requires uppercase-only to avoid false positives from common words (e.g. "to12", "on34")
+  const enPattern = /^[A-Z]{2,8}[\s/\._-]?[0-9]{2,10}$/;
 
   // Pattern 4: Generic Bengali prefix + digits
   const genericBn = /^[\u0980-\u09FF]{2,8}[\s/\._-]?[0-9\u09E6-\u09EF]{2,10}$/u;

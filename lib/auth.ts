@@ -2,9 +2,15 @@ import { SignJWT, jwtVerify } from 'jose';
 import bcrypt from 'bcryptjs';
 import { cookies } from 'next/headers';
 
-const SECRET_KEY = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'rkm_initiation_secret_key_default'
-);
+// Fail fast at startup if JWT_SECRET is not configured — never silently fall back to a weak key.
+if (!process.env.JWT_SECRET) {
+  throw new Error(
+    'JWT_SECRET environment variable is not set. ' +
+    'Generate one with: openssl rand -hex 32'
+  );
+}
+
+const SECRET_KEY = new TextEncoder().encode(process.env.JWT_SECRET);
 
 const COOKIE_NAME = 'admin_session';
 
@@ -52,7 +58,8 @@ export async function setSessionCookie(token: string) {
   const cookieStore = await cookies();
   cookieStore.set(COOKIE_NAME, token, {
     httpOnly: true,
-    secure: process.env.COOKIE_SECURE === 'true',
+    // Always secure in production; can be overridden for local HTTPS dev with COOKIE_SECURE=true
+    secure: process.env.NODE_ENV === 'production' || process.env.COOKIE_SECURE === 'true',
     sameSite: 'lax',
     path: '/',
     maxAge: 60 * 60 * 24, // 1 day

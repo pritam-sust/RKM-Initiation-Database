@@ -21,6 +21,9 @@ export default function SearchForm({ initialFilters, onSearch, isLoading }: Sear
     'name',
     'diksha_date',
     'diksha_guru',
+    'diksha_venue',
+    'diksha_ceremony_serial',
+    'address',
   ];
 
   const activeFilterCount = publicFilterKeys.reduce((acc, key) => {
@@ -53,6 +56,8 @@ export default function SearchForm({ initialFilters, onSearch, isLoading }: Sear
       education: '',
       diksha_date: '',
       diksha_guru: '',
+      diksha_venue: '',
+      diksha_ceremony_serial: '',
     };
     setFilters(emptyFilters);
     onSearch(emptyFilters);
@@ -198,6 +203,39 @@ export default function SearchForm({ initialFilters, onSearch, isLoading }: Sear
                 placeholder={t('dikshaDate')}
                 value={filters.diksha_date || ''}
                 onChange={(e) => handleFieldChange('diksha_date', e.target.value)}
+              />
+            </div>
+
+            <div className="col-12 col-sm-6 col-lg-3">
+              <label className="form-label-custom">{t('dikshaVenue')}</label>
+              <input
+                type="text"
+                className="form-control-custom"
+                placeholder={t('dikshaVenue')}
+                value={filters.diksha_venue || ''}
+                onChange={(e) => handleFieldChange('diksha_venue', e.target.value)}
+              />
+            </div>
+
+            <div className="col-12 col-sm-6 col-lg-3">
+              <label className="form-label-custom">{t('dikshaCeremonySerial')}</label>
+              <input
+                type="text"
+                className="form-control-custom"
+                placeholder={t('dikshaCeremonySerial')}
+                value={filters.diksha_ceremony_serial || ''}
+                onChange={(e) => handleFieldChange('diksha_ceremony_serial', e.target.value)}
+              />
+            </div>
+
+            <div className="col-12 col-sm-6 col-lg-3">
+              <label className="form-label-custom">{t('address')}</label>
+              <input
+                type="text"
+                className="form-control-custom"
+                placeholder={t('address')}
+                value={filters.address || ''}
+                onChange={(e) => handleFieldChange('address', e.target.value)}
               />
             </div>
           </div>

@@ -6,6 +6,15 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('Seeding database...');
 
+  const seedPassword = process.env.ADMIN_SEED_PASSWORD;
+  if (!seedPassword) {
+    throw new Error(
+      'ADMIN_SEED_PASSWORD environment variable is not set.\n' +
+      'Set it in your .env file before running db:seed.\n' +
+      'Example: ADMIN_SEED_PASSWORD="your_strong_password_here"'
+    );
+  }
+
   // Create default admin user if not exists
   const adminUsername = 'admin';
   const existingAdmin = await prisma.adminUser.findUnique({
@@ -13,14 +22,14 @@ async function main() {
   });
 
   if (!existingAdmin) {
-    const passwordHash = await bcrypt.hash('admin123', 10);
+    const passwordHash = await bcrypt.hash(seedPassword, 10);
     await prisma.adminUser.create({
       data: {
         username: adminUsername,
         password_hash: passwordHash,
       },
     });
-    console.log('Default admin created: username="admin", password="admin123"');
+    console.log(`Default admin user created with username: "${adminUsername}".`);
   } else {
     console.log('Admin user already exists.');
   }

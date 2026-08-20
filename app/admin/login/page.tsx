@@ -114,12 +114,6 @@ export default function AdminLoginPage() {
             </button>
           </form>
         </div>
-
-        {/* <div className="p-3 bg-slate-50 text-center border-top">
-          <span className="extra-small text-muted" style={{ fontSize: '0.75rem' }}>
-            Default credentials: <code className="text-dark bg-white px-1 py-0.5 rounded border">admin</code> / <code className="text-dark bg-white px-1 py-0.5 rounded border">admin123</code>
-          </span>
-        </div> */}
       </div>
     </div>
   );

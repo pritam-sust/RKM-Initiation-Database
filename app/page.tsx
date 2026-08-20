@@ -44,7 +44,8 @@ export default function PublicSearchPage() {
         if (currentFilters.education?.trim()) params.set('education', currentFilters.education.trim());
         if (currentFilters.diksha_date?.trim()) params.set('diksha_date', currentFilters.diksha_date.trim());
         if (currentFilters.diksha_guru?.trim()) params.set('diksha_guru', currentFilters.diksha_guru.trim());
-        
+        if (currentFilters.diksha_venue?.trim()) params.set('diksha_venue', currentFilters.diksha_venue.trim());
+        if (currentFilters.diksha_ceremony_serial?.trim()) params.set('diksha_ceremony_serial', currentFilters.diksha_ceremony_serial.trim());
         params.set('page', String(currentPage));
         params.set('limit', String(currentLimit));
         params.set('sortBy', currentSortBy);

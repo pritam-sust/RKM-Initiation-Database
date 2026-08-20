@@ -2,6 +2,7 @@ import { getAdminSession } from '@/lib/auth';
 import { normalizeDateToSortable } from '@/lib/dateUtils';
 import { prisma } from '@/lib/db';
 import { personSchema } from '@/lib/validators';
+import { Prisma } from '@prisma/client';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(
@@ -55,20 +56,8 @@ export async function PUT(
 
     const { unique_id, name, father_or_spouse_name, age, address, mobile_number, occupation, education, diksha_date, diksha_guru, diksha_venue, diksha_ceremony_serial } = parseResult.data;
 
-    // Check if unique_id is taken by another record
-    const existing = await prisma.person.findFirst({
-      where: {
-        unique_id,
-        NOT: { id },
-      },
-    });
-
-    if (existing) {
-      return NextResponse.json(
-        { error: `Initiation Number "${unique_id}" is already used by another record.` },
-        { status: 409 }
-      );
-    }
+    // No pre-update uniqueness check — the DB @unique constraint is the authoritative guard.
+    // P2002 is caught below, preventing TOCTOU race conditions.
 
     const cleanAge = age ? age.replace(/[$৳₹€£¥]/g, '').replace(/\.00$/, '').trim() : null;
     const sortableDate = normalizeDateToSortable(diksha_date);
@@ -94,6 +83,13 @@ export async function PUT(
 
     return NextResponse.json({ success: true, data: updated });
   } catch (error) {
+    // Unique constraint violation — race condition safe fallback
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+      return NextResponse.json(
+        { error: 'Initiation Number is already used by another record.' },
+        { status: 409 }
+      );
+    }
     console.error('Admin PUT Person error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }

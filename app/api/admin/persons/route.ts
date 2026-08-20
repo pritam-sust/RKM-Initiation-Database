@@ -5,6 +5,8 @@ import { personSchema } from '@/lib/validators';
 import { Prisma } from '@prisma/client';
 import { NextRequest, NextResponse } from 'next/server';
 
+const BULK_DELETE_MAX = 500;
+
 export async function GET(request: NextRequest) {
   const session = await getAdminSession();
   if (!session) {
@@ -222,17 +224,8 @@ export async function POST(request: NextRequest) {
       diksha_ceremony_serial,
     } = parseResult.data;
 
-    // Check if unique_id already exists
-    const existing = await prisma.person.findUnique({
-      where: { unique_id },
-    });
-
-    if (existing) {
-      return NextResponse.json(
-        { error: `Initiation Number "${unique_id}" already exists.` },
-        { status: 409 }
-      );
-    }
+    // No pre-insert uniqueness check — the DB @unique constraint is the authoritative guard.
+    // P2002 is caught below, preventing TOCTOU race conditions.
 
     const cleanAge = age ? age.replace(/[$৳₹€£¥]/g, '').replace(/\.00$/, '').trim() : null;
     const sortableDate = normalizeDateToSortable(diksha_date);
@@ -257,6 +250,13 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: newPerson }, { status: 201 });
   } catch (error) {
+    // Unique constraint violation — race condition safe fallback
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+      return NextResponse.json(
+        { error: `Initiation Number already exists.` },
+        { status: 409 }
+      );
+    }
     console.error('Admin POST Person error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
@@ -279,6 +279,13 @@ export async function DELETE(request: NextRequest) {
     if (ids.length === 0) {
       return NextResponse.json(
         { error: 'No record IDs provided for deletion.' },
+        { status: 400 }
+      );
+    }
+
+    if (ids.length > BULK_DELETE_MAX) {
+      return NextResponse.json(
+        { error: `Cannot delete more than ${BULK_DELETE_MAX} records in a single request.` },
         { status: 400 }
       );
     }

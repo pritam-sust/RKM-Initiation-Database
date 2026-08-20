@@ -179,41 +179,64 @@ export async function GET(request: NextRequest) {
         ? conditions[0]
         : { AND: conditions };
 
-    const [persons, total] = await Promise.all([
+    // Public-facing fields: only these are fetched for non-admin users.
+    // Sensitive fields never leave the DB layer for public requests.
+    const publicSelect = {
+      id: true,
+      unique_id: true,
+      name: true,
+      diksha_date: true,
+      diksha_guru: true,
+      created_at: true,
+      updated_at: true,
+    } as const;
+
+    const adminSelect = {
+      id: true,
+      unique_id: true,
+      name: true,
+      father_or_spouse_name: true,
+      age: true,
+      address: true,
+      mobile_number: true,
+      occupation: true,
+      education: true,
+      diksha_date: true,
+      diksha_date_sort: true,
+      diksha_guru: true,
+      diksha_venue: true,
+      diksha_ceremony_serial: true,
+      created_at: true,
+      updated_at: true,
+    } as const;
+
+    const [rawPersons, total] = await Promise.all([
       prisma.person.findMany({
         where: whereClause,
         orderBy,
         skip,
         take: limit,
+        select: isAdmin ? adminSelect : publicSelect,
       }),
       prisma.person.count({ where: whereClause }),
     ]);
 
-    // Format sanitized data based on authentication:
-    // Without admin access: users can only view unique_id, name, diksha_date, diksha_guru
-    // All other fields including diksha_venue, diksha_ceremony_serial, address, mobile, etc. are restricted to admins only
-    const formattedData = persons.map((p) => {
-      if (isAdmin) {
-        return p;
-      }
-      return {
-        id: p.id,
-        unique_id: p.unique_id,
-        name: p.name,
-        diksha_date: p.diksha_date,
-        diksha_guru: p.diksha_guru,
-        diksha_venue: null,
-        diksha_ceremony_serial: null,
-        father_or_spouse_name: null,
-        age: null,
-        address: '',
-        mobile_number: null,
-        occupation: null,
-        education: null,
-        created_at: p.created_at,
-        updated_at: p.updated_at,
-      };
-    });
+    // Normalise shape: non-admin rows are missing restricted fields; fill nulls to keep
+    // the API response shape consistent for clients.
+    const formattedData = isAdmin
+      ? rawPersons
+      : rawPersons.map((p) => ({
+          ...p,
+          father_or_spouse_name: null,
+          age: null,
+          address: '',
+          mobile_number: null,
+          occupation: null,
+          education: null,
+          diksha_date_sort: null,
+          diksha_venue: null,
+          diksha_ceremony_serial: null,
+        }));
 
     return NextResponse.json({
       data: formattedData,
