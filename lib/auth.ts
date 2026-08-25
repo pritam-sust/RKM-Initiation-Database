@@ -56,10 +56,20 @@ export async function getAdminSession(): Promise<AdminPayload | null> {
 
 export async function setSessionCookie(token: string) {
   const cookieStore = await cookies();
+
+  // COOKIE_SECURE=false  → always insecure  (local HTTP with `next start`)
+  // COOKIE_SECURE=true   → always secure    (explicit override)
+  // unset + production   → secure           (safe default)
+  // unset + development  → insecure         (next dev)
+  const cookieSecureEnv = process.env.COOKIE_SECURE;
+  const isSecure =
+    cookieSecureEnv === 'false'
+      ? false
+      : cookieSecureEnv === 'true' || process.env.NODE_ENV === 'production';
+
   cookieStore.set(COOKIE_NAME, token, {
     httpOnly: true,
-    // Always secure in production; can be overridden for local HTTPS dev with COOKIE_SECURE=true
-    secure: process.env.NODE_ENV === 'production' || process.env.COOKIE_SECURE === 'true',
+    secure: isSecure,
     sameSite: 'lax',
     path: '/',
     maxAge: 60 * 60 * 24, // 1 day

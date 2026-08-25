@@ -94,6 +94,56 @@ export function parseUniqueIdLine(line: string): { unique_id: string; restOfLine
 }
 
 /**
+ * Detects a ceremony-header line in the block-header document format.
+ *
+ * The format groups person records under repeating header blocks:
+ *   গুরুদেবের কততম দীক্ষানুষ্ঠানঃ  200531     → diksha_ceremony_serial
+ *   গুরুদেব নামঃ শ্রীমৎ স্র্‹...       → diksha_guru
+ *   দীক্ষানুষ্ঠানের ভেন্যুঃ ...         → diksha_venue
+ *   দীক্ষা তারিখঃ ৩০/০৭/২০০৫          → diksha_date
+ *
+ * Returns the matched field name and extracted value, or null if not a header line.
+ */
+export function parseHeaderLine(line: string): {
+  field: 'diksha_ceremony_serial' | 'diksha_guru' | 'diksha_venue' | 'diksha_date';
+  value: string;
+} | null {
+  const trimmed = line.trim();
+
+  // Header lines use Bengali visarga ঃ (U+0983) as the key–value separator.
+  // Fall back to plain colon ':' for documents that normalise punctuation.
+  let colonIdx = trimmed.indexOf('\u0983');
+  if (colonIdx === -1) colonIdx = trimmed.indexOf(':');
+  if (colonIdx === -1) return null;
+
+  const keyword = trimmed.substring(0, colonIdx).trim();
+  const value = trimmed.substring(colonIdx + 1).trim();
+  if (!value) return null;
+
+  // দীক্ষানুষ্ঠান সিরিয়াল নং: "গুরুদেবের কততম দীক্ষানুষ্ঠানঃ" or "কততম দীক্ষা"
+  if (/কততম\s*দীক্ষ/u.test(keyword)) {
+    return { field: 'diksha_ceremony_serial', value };
+  }
+
+  // Guru: "গুরুদেব নামঃ" or "দীক্ষাগুরুঃ"
+  if (/গুরুদেব\s*নাম|দীক্ষাগুরু/u.test(keyword)) {
+    return { field: 'diksha_guru', value };
+  }
+
+  // Venue: "দীক্ষানুষ্ঠানের ভেন্যুঃ" or "ভেন্যুঃ"
+  if (/ভেন্যু/u.test(keyword)) {
+    return { field: 'diksha_venue', value };
+  }
+
+  // Date: "দীক্ষা তারিখঃ" or "দীক্ষার তারিখঃ"
+  if (/দীক্ষ[া\s]*র?\s*তারিখ/u.test(keyword)) {
+    return { field: 'diksha_date', value };
+  }
+
+  return null;
+}
+
+/**
  * Preprocesses document text:
  * 1. Converts Bijoy ANSI text to Unicode Bengali if Bijoy formatting is detected.
  * 2. Inserts newlines before inline Initiation Number patterns so multiple records on a single line are split cleanly.
@@ -140,6 +190,14 @@ export function preprocessText(rawText: string): string {
 /**
  * Main Document Parser Engine.
  * Converts raw document text into structured records with Initiation Number, Name, and multiline Address.
+ *
+ * Supports two document layouts:
+ *
+ * 1. Block-header format (new): repeated header blocks provide shared diksha_guru / diksha_venue /
+ *    diksha_date / diksha_ceremony_serial for all person records that follow until the next block.
+ *
+ * 2. Flat format (original): per-record labeled fields (e.g. "দীক্ষাগুরু: ...") or Excel sheets.
+ *    These continue to work unchanged.
  */
 export function parseDocumentText(rawText: string): RawParsedPerson[] {
   const cleanedText = preprocessText(rawText);
@@ -148,6 +206,20 @@ export function parseDocumentText(rawText: string): RawParsedPerson[] {
     .split(/\r?\n/)
     .map((l) => l.trim())
     .filter((l) => l.length > 0);
+
+  // Shared context inherited from the most recent ceremony header block.
+  // Starts empty; stays empty for flat-format documents (backward compatible).
+  let currentContext: {
+    diksha_guru: string | null;
+    diksha_venue: string | null;
+    diksha_date: string | null;
+    diksha_ceremony_serial: string | null;
+  } = {
+    diksha_guru: null,
+    diksha_venue: null,
+    diksha_date: null,
+    diksha_ceremony_serial: null,
+  };
 
   const rawRecords: Array<{
     unique_id: string;
@@ -160,6 +232,8 @@ export function parseDocumentText(rawText: string): RawParsedPerson[] {
     education?: string | null;
     diksha_date?: string | null;
     diksha_guru?: string | null;
+    diksha_venue?: string | null;
+    diksha_ceremony_serial?: string | null;
   }> = [];
 
   let currentRecord: {
@@ -173,22 +247,28 @@ export function parseDocumentText(rawText: string): RawParsedPerson[] {
     education?: string | null;
     diksha_date?: string | null;
     diksha_guru?: string | null;
+    diksha_venue?: string | null;
+    diksha_ceremony_serial?: string | null;
   } | null = null;
 
   for (const line of lines) {
-    const idLineMatch = parseUniqueIdLine(line);
+    // ── Step 1: Detect ceremony header lines ────────────────────────────────────────
+    const headerMatch = parseHeaderLine(line);
+    if (headerMatch) {
+      // Update shared context; header lines never belong to a person record
+      currentContext[headerMatch.field] = headerMatch.value;
+      continue;
+    }
 
+    // ── Step 2: Detect person ID lines ──────────────────────────────────────────
+    const idLineMatch = parseUniqueIdLine(line);
     if (idLineMatch) {
-      // Save previous record if existing
-      if (currentRecord) {
-        rawRecords.push(currentRecord);
-      }
+      if (currentRecord) rawRecords.push(currentRecord);
 
       let name = idLineMatch.restOfLine;
-      let dikshaDate: string | null = null;
-
-      // Extract optional diksha date patterns if present in name line
-      const dikshaMatch = name.match(/(?:দীক্ষার\s*তারিখ|দীক্ষা\s*তারিখ|দীক্ষা|Diksha|Initiated)[\s:]*([^\s,]+)/i);
+      // Start with context date; allow per-line override if present in name portion
+      let dikshaDate: string | null = currentContext.diksha_date;
+      const dikshaMatch = name.match(/(?:দীক্ষার\s*তারিখ|দীক্ষা\s*তারিখ|Diksha|Initiated)[\s:]*([^\s,]+)/i);
       if (dikshaMatch) {
         dikshaDate = dikshaMatch[1];
         name = name.replace(dikshaMatch[0], '').trim();
@@ -196,7 +276,7 @@ export function parseDocumentText(rawText: string): RawParsedPerson[] {
 
       currentRecord = {
         unique_id: idLineMatch.unique_id,
-        name: name,
+        name,
         father_or_spouse_name: null,
         age: null,
         addressLines: [],
@@ -204,35 +284,70 @@ export function parseDocumentText(rawText: string): RawParsedPerson[] {
         occupation: null,
         education: null,
         diksha_date: dikshaDate,
-        diksha_guru: null,
+        diksha_guru: currentContext.diksha_guru,
+        diksha_venue: currentContext.diksha_venue,
+        diksha_ceremony_serial: currentContext.diksha_ceremony_serial,
       };
-    } else if (currentRecord) {
-      if (!currentRecord.name) {
-        currentRecord.name = line;
-      } else {
-        const dateMatch = line.match(/(?:দীক্ষার\s*তারিখ|দীক্ষা\s*তারিখ|দীক্ষা|Diksha|Initiated)[\s:]*(.+)$/i);
-        const guruMatch = line.match(/(?:দীক্ষাগুরু|Guru|Swami)[\s:]*(.+)$/i);
-        const mobileMatch = line.match(/(?:মোবাইল|Mobile|Phone|Tel)[\s:]*([0-9\u09E6-\u09EF\s\-+]+)/i);
-        const fatherMatch = line.match(/(?:পিতা|স্বামী|Father|Spouse|Husband)[\s:]*(.+)$/i);
-
-        if (dateMatch) {
-          currentRecord.diksha_date = dateMatch[1].trim();
-        } else if (guruMatch) {
-          currentRecord.diksha_guru = guruMatch[1].trim();
-        } else if (mobileMatch) {
-          currentRecord.mobile_number = mobileMatch[1].trim();
-        } else if (fatherMatch) {
-          currentRecord.father_or_spouse_name = fatherMatch[1].trim();
-        } else {
-          currentRecord.addressLines.push(line);
-        }
-      }
+      continue;
     }
+
+    // ── Step 3: Sub-lines belonging to the current person record ────────────────
+    if (!currentRecord) continue; // no active record — skip orphaned lines
+
+    // Name continuation (should rarely happen; mainly for edge-case flat formats)
+    if (!currentRecord.name) {
+      currentRecord.name = line;
+      continue;
+    }
+
+    // Per-record diksha date override (flat / old format)
+    const dateMatch = line.match(/(?:দীক্ষার\s*তারিখ|দীক্ষা\s*তারিখ|Diksha|Initiated)[\s:]*(.+)$/i);
+    if (dateMatch) { currentRecord.diksha_date = dateMatch[1].trim(); continue; }
+
+    // Per-record guru override (flat / old format)
+    const guruMatch = line.match(/^(?:দীক্ষাগুরু|Guru)[\s:]*(.+)$/i);
+    if (guruMatch) { currentRecord.diksha_guru = guruMatch[1].trim(); continue; }
+
+    // Mobile number
+    const mobileMatch = line.match(/(?:মোবাইল|Mobile|Phone|Tel)[\s:]*([0-9\u09E6-\u09EF\s\-+]+)/i);
+    if (mobileMatch) { currentRecord.mobile_number = mobileMatch[1].trim(); continue; }
+
+    // Father / spouse — প্র/ or প্র। prefix (most common in this document format)
+    const prMatch = line.match(/^প্র[\/।৷]\.?\s*(.+)$/u);
+    if (prMatch) { currentRecord.father_or_spouse_name = prMatch[1].trim(); continue; }
+
+    // Father / spouse — keyword labels (পিতা, মাতা, Father, Husband, Spouse)
+    const fatherKeyMatch = line.match(/^(?:পিতা|মাতা|Father|Husband|Spouse)[\s:]*(.+)$/iu);
+    if (fatherKeyMatch) { currentRecord.father_or_spouse_name = fatherKeyMatch[1].trim(); continue; }
+
+    // Father / spouse — line starting with স্বামী (husband name; keep full text as the reference)
+    if (/^স্বামী\s/u.test(line)) { currentRecord.father_or_spouse_name = line; continue; }
+
+    // Everything else → address line
+    currentRecord.addressLines.push(line);
   }
 
   // Push the final record
-  if (currentRecord) {
-    rawRecords.push(currentRecord);
+  if (currentRecord) rawRecords.push(currentRecord);
+
+  // ── Shared address propagation ─────────────────────────────────────────────
+  // Documents often list multiple consecutive IDs followed by a single address
+  // block that applies to all of them:
+  //
+  //   বিএ৮০১১  শ্রীপরিমল চন্দ্র বসাক       ← no address
+  //   বিএ৮০১২  শ্রীমতী সোমা বসাক
+  //       জেলা জজ কোর্ট                      ← address for both
+  //       পোঃ/জেলা - চট্টগ্রাম।
+  //
+  // Backward pass: if record[i] has no address but record[i+1] has one,
+  // copy the address lines upward through the chain of empty-address records.
+  for (let i = rawRecords.length - 2; i >= 0; i--) {
+    if (
+      rawRecords[i].addressLines.length === 0 &&
+      rawRecords[i + 1].addressLines.length > 0
+    ) {
+      rawRecords[i].addressLines = [...rawRecords[i + 1].addressLines];
+    }
   }
 
   return rawRecords.map((rec) => ({
@@ -246,6 +361,8 @@ export function parseDocumentText(rawText: string): RawParsedPerson[] {
     education: rec.education || null,
     diksha_date: rec.diksha_date || null,
     diksha_guru: rec.diksha_guru || null,
+    diksha_venue: rec.diksha_venue || null,
+    diksha_ceremony_serial: rec.diksha_ceremony_serial || null,
   }));
 }
 
