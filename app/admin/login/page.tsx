@@ -76,7 +76,7 @@ export default function AdminLoginPage() {
                   onChange={(e) => setUsername(e.target.value)}
                   required
                 />
-                <User size={15} className="position-absolute text-muted" style={{ left: '0.75rem', top: '50%', transform: 'translateY(-50%)' }} />
+                <User size={15} className="position-absolute text-muted" style={{ left: '0.5rem', top: '50%', transform: 'translateY(-50%)' }} />
               </div>
             </div>
 
@@ -91,7 +91,7 @@ export default function AdminLoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                 />
-                <Key size={15} className="position-absolute text-muted" style={{ left: '0.75rem', top: '50%', transform: 'translateY(-50%)' }} />
+                <Key size={15} className="position-absolute text-muted" style={{ left: '0.5rem', top: '50%', transform: 'translateY(-50%)' }} />
               </div>
             </div>
 

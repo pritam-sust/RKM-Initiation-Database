@@ -1,7 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Produces a self-contained .next/standalone/ bundle for deployment.
+  // Transfer standalone/ + .next/static/ + public/ — no node_modules copy needed.
+  output: 'standalone',
 };
 
 export default nextConfig;
