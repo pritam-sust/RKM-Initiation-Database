@@ -30,18 +30,21 @@ export function isUniqueIdToken(token: string): boolean {
 
   const clean = token.replace(/[:;,]$/, '').trim();
 
-  // Pattern 1: Bengali prefix + Bengali/English digits (e.g. সিএ১২৩৪৫৬, ডিএ২০৬৪, ডিএ2064)
-  const bnPattern = /^(?:ডিএ|সিএ|ডি-এ|ডিঅ)[\s/\._-]?[0-9\u09E6-\u09EF]{2,10}$/u;
+  // Pattern 1: Bengali named prefix + Bengali/English digits (e.g. ডিএ২০৬৪, সিএ১২৩৪৫৬)
+  // No separator allowed — diksha numbers are always written as a single token.
+  const bnPattern = /^(?:ডিএ|সিএ|ডি-এ|ডিঅ)[0-9\u09E6-\u09EF]{2,10}$/u;
 
   // Pattern 2: Bijoy representation (e.g. wWG2064, wWG2065)
-  const bijoyPattern = /^wWG[\s/\._-]?[0-9]{2,10}$/i;
+  const bijoyPattern = /^wWG[0-9]{2,10}$/i;
 
-  // Pattern 3: English uppercase prefix + digits (e.g. DA6140, DA6141, CA123456, RKM-001)
-  // Requires uppercase-only to avoid false positives from common words (e.g. "to12", "on34")
-  const enPattern = /^[A-Z]{2,8}[\s/\._-]?[0-9]{2,10}$/;
+  // Pattern 3: English uppercase prefix + digits (e.g. DA6140, CA123456)
+  // Requires uppercase-only to avoid false positives from common words.
+  const enPattern = /^[A-Z]{2,8}[0-9]{2,10}$/;
 
-  // Pattern 4: Generic Bengali prefix + digits
-  const genericBn = /^[\u0980-\u09FF]{2,8}[\s/\._-]?[0-9\u09E6-\u09EF]{2,10}$/u;
+  // Pattern 4: Generic Bengali LETTER prefix + digits (e.g. ইএ৬৬২৫, বিএ৮০১১)
+  // Prefix must be Bengali LETTERS only (U+0980-U+09E5, U+09F0-U+09FF) — NOT Bengali digits
+  // (U+09E6-U+09EF). No separator: letters and digits are always directly adjacent.
+  const genericBn = /^[\u0980-\u09E5\u09F0-\u09FF]{2,8}[0-9\u09E6-\u09EF]{2,10}$/u;
 
   // Pattern 5: Pure numeric code if >= 4 digits
   const numPattern = /^[0-9\u09E6-\u09EF]{4,10}$/;
