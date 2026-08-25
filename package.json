@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start -H 0.0.0.0 -p 3000",
     "lint": "eslint",
-    "db:seed": "npx prisma db seed"
+    "db:seed": "npx prisma db seed",
+    "deploy:package": "DEPLOY_DIR=\"$HOME/Desktop/rkm-deploy\" && rm -rf \"$DEPLOY_DIR\" && mkdir -p \"$DEPLOY_DIR\" && cp -r .next/standalone \"$DEPLOY_DIR/\" && cp -r .next/static \"$DEPLOY_DIR/standalone/.next/static\" && cp -r public \"$DEPLOY_DIR/standalone/public\" && cp -r prisma \"$DEPLOY_DIR/\" && cd \"$(dirname $DEPLOY_DIR)\" && zip -r rkm-deploy.zip \"$(basename $DEPLOY_DIR)/\" && echo \"✅ Package ready: $(dirname $DEPLOY_DIR)/rkm-deploy.zip\""
   },
   "prisma": {
     "seed": "npx tsx prisma/seed.ts"
